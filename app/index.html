@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M.A.R.C Command Centre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#030b17; --bg2:#06142a; --panel:rgba(8,26,48,.72); --panel-solid:#081a30;
+  --line:rgba(56,189,248,.18); --line-strong:rgba(56,189,248,.45);
+  --cyan:#22d3ee; --cyan-soft:#7dd3fc; --text:#e2f1ff; --muted:#7f9bb8; --dim:#4b6582;
+  --green:#34d399; --amber:#fbbf24; --red:#f87171; --violet:#a78bfa;
+  --glow:0 0 18px rgba(34,211,238,.35);
+  --r:10px;
+  --display:'Orbitron',system-ui,sans-serif; --ui:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:
+    radial-gradient(ellipse at 50% 20%,rgba(14,116,144,.25),transparent 60%),
+    linear-gradient(rgba(56,189,248,.04) 1px,transparent 1px) 0 0/32px 32px,
+    linear-gradient(90deg,rgba(56,189,248,.04) 1px,transparent 1px) 0 0/32px 32px,
+    var(--bg);
+  color:var(--text); font:13px/1.4 var(--ui); overflow-x:hidden;
+}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;transition:background .2s,box-shadow .2s,border-color .2s}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.bi{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;flex:none}
+.shell{display:grid;grid-template-columns:230px minmax(0,1fr);grid-template-rows:64px minmax(0,1fr) 64px;gap:12px;padding:12px;min-height:100vh}
+
+/* ---------- panels ---------- */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;position:relative;backdrop-filter:blur(6px);min-width:0}
+.panel::before{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(135deg,var(--line-strong),transparent 25%,transparent 75%,var(--line-strong)) border-box;
+  -webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;border:1px solid transparent}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.ph h2{font:600 11px/1 var(--display);letter-spacing:.14em;color:var(--cyan-soft);text-transform:uppercase}
+.link{color:var(--cyan);font-size:11px}
+.link:hover{text-decoration:underline}
+.tag{font-size:9px;font-weight:600;letter-spacing:.08em;padding:3px 7px;border-radius:20px;border:1px solid currentColor;text-transform:uppercase;white-space:nowrap}
+.t-live{color:var(--green)} .t-info{color:var(--cyan)} .t-warn{color:var(--amber)} .t-tip{color:var(--green)} .t-off{color:var(--dim)}
+.sample{font:500 9px var(--ui);color:var(--amber);letter-spacing:.08em;opacity:.8}
+
+/* ---------- sidebar ---------- */
+.side{grid-row:1/3;display:flex;flex-direction:column;gap:12px}
+.brand{display:flex;gap:12px;align-items:center;padding:6px 4px 10px}
+.brand .mark{width:42px;height:42px;border-radius:50%;border:2px solid var(--cyan);box-shadow:var(--glow),inset var(--glow);display:grid;place-items:center}
+.brand .mark i{width:14px;height:14px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px var(--cyan)}
+.brand b{font:700 20px/1 var(--display);letter-spacing:.18em;display:block}
+.brand small{font-size:8.5px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+nav{display:flex;flex-direction:column;gap:2px}
+.nav{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;color:#b9cde3;border:1px solid transparent;width:100%;text-align:left}
+.nav svg{width:17px;height:17px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7}
+.nav:hover{background:rgba(34,211,238,.06)}
+.nav.on{border-color:var(--line-strong);background:linear-gradient(90deg,rgba(34,211,238,.16),transparent);color:#fff;box-shadow:inset 3px 0 0 var(--cyan)}
+.nav .n{margin-left:auto;font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(34,211,238,.14);color:var(--cyan-soft)}
+.nav .soon{margin-left:auto;font-size:8.5px;letter-spacing:.08em;color:var(--dim);text-transform:uppercase}
+.navsep{font:600 9px var(--display);letter-spacing:.16em;color:var(--dim);padding:10px 12px 4px}
+.voice{margin-top:auto;text-align:center}
+.wave{display:flex;gap:2px;justify-content:center;align-items:center;height:30px;margin:6px 0 10px}
+.wave span{width:2px;background:var(--cyan);border-radius:2px;box-shadow:0 0 6px var(--cyan);animation:wv 1.2s ease-in-out infinite}
+@keyframes wv{50%{transform:scaleY(.35)}}
+.mic{width:76px;height:76px;margin:6px auto 6px;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle,#0e7490 0,#083344 60%);box-shadow:0 0 0 8px rgba(34,211,238,.08),0 0 0 16px rgba(34,211,238,.05),0 0 30px rgba(34,211,238,.5)}
+.mic svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:1.8}
+.btn{border:1px solid var(--line-strong);border-radius:8px;padding:8px 14px;display:inline-flex;gap:8px;align-items:center;justify-content:center;background:rgba(34,211,238,.06)}
+.btn:hover{background:rgba(34,211,238,.14);box-shadow:var(--glow)}
+
+/* ---------- top bar ---------- */
+.top{display:flex;align-items:center;gap:12px}
+.status{display:flex;gap:10px;align-items:center;padding:9px 16px;border:1px solid var(--line-strong);border-radius:24px;font:600 10px var(--display);letter-spacing:.12em;background:var(--panel)}
+.status em{font-style:normal;color:var(--green)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.clock{flex:1;text-align:center}
+.clock small{display:block;color:var(--muted);font-size:11px}
+.clock b{font:700 24px/1.1 var(--display);color:var(--cyan);text-shadow:var(--glow);letter-spacing:.06em}
+.search{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;width:240px;background:var(--panel);color:var(--muted)}
+.search input{background:none;border:0;outline:0;color:var(--text);width:100%;font:inherit}
+.ib{width:36px;height:36px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;background:var(--panel)}
+.ib svg{width:16px;height:16px;stroke:#b9cde3;fill:none;stroke-width:1.7}
+.op{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:5px 6px 5px 12px;background:var(--panel)}
+.op b{display:block;font-size:12px} .op small{color:var(--muted);font-size:10px}
+.av{width:30px;height:30px;border-radius:50%;border:1px solid var(--cyan);display:grid;place-items:center;font:700 11px var(--display);color:var(--cyan)}
+
+/* ---------- main grid ---------- */
+main{min-width:0}
+.view{display:none} .view.on{display:grid}
+#dash{grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:minmax(0,auto);gap:12px}
+.c3{grid-column:span 3}.c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c2{grid-column:span 2}
+
+.list{display:flex;flex-direction:column;gap:6px}
+.row{display:flex;gap:10px;align-items:center;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:rgba(3,11,23,.45)}
+.ico{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;flex:none;border:1px solid currentColor;background:color-mix(in srgb,currentColor 12%,transparent)}
+.ico svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+.row b{font-weight:600;font-size:12px;display:block;color:var(--text)}
+.row small{font-size:10.5px}
+.row .grow{flex:1;min-width:0}
+.row .grow b,.row .grow small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.cy{color:var(--cyan)}.gr{color:var(--green)}.am{color:var(--amber)}.vi{color:var(--violet)}.rd{color:var(--red)}.mu{color:var(--muted)}
+
+/* core orb */
+.core{display:grid;place-items:center;min-height:300px;overflow:hidden;padding:0}
+.core svg{width:100%;height:100%;max-height:330px}
+.spin{transform-origin:400px 170px;animation:sp 40s linear infinite}
+.spin2{transform-origin:400px 170px;animation:sp 60s linear infinite reverse}
+@keyframes sp{to{transform:rotate(360deg)}}
+.pulse{animation:pl 3s ease-in-out infinite}
+@keyframes pl{50%{opacity:.55}}
+
+/* agents */
+.agents{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.agent{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;grid-template-columns:28px minmax(0,1fr);gap:6px 10px;align-items:center;background:rgba(3,11,23,.45);min-width:0}
+.agent .spark{grid-column:1/-1;margin:0;justify-content:flex-start;height:18px}
+.agent b{font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agent small{font-size:10px;display:flex;gap:5px;align-items:center}
+.agent small::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 6px currentColor}
+.spark{margin-left:auto;display:flex;gap:1px;align-items:center;height:22px;flex:none}
+.spark i{width:2px;background:currentColor;border-radius:1px;opacity:.85}
+
+/* timeline */
+.tl{display:flex;flex-direction:column;gap:12px;position:relative;padding-left:4px}
+.tli{display:grid;grid-template-columns:40px 10px 1fr auto;gap:8px;align-items:center;font-size:11px}
+.tli time{color:var(--muted);font-size:10px;line-height:1.2}
+.tli i{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.tli i.am{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.tli b{font-weight:500;border-bottom:1px solid var(--line-strong);padding-bottom:3px}
+.tli span{color:var(--muted);font-size:10px}
+
+/* quick commands */
+.qc{display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:rgba(3,11,23,.45);text-align:left}
+.qc:hover{border-color:var(--line-strong);box-shadow:var(--glow)}
+.qc svg{width:15px;height:15px;stroke:var(--cyan);fill:none;stroke-width:1.8}
+
+/* rings */
+.rings{display:flex;justify-content:space-around;align-items:center;gap:8px;padding-top:6px}
+.ring{text-align:center}
+.ring svg{width:92px;height:92px;transform:rotate(-90deg)}
+.ring .lbl{margin-top:-62px;height:62px;font:600 10px var(--ui);color:var(--muted)}
+.ring .lbl b{display:block;font:700 15px/62px var(--display);color:var(--text)}
+.ring p{font-size:10.5px;color:var(--muted);margin-top:4px}
+
+/* skills */
+.skill{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:rgba(3,11,23,.45)}
+.skill b{font-size:12px} .skill small{grid-column:1/-1;color:var(--muted);font-size:10.5px}
+.skill a{color:var(--dim);font-size:10px;text-decoration:none;grid-column:1/-1}
+.skill a:hover{color:var(--cyan)}
+
+/* llm */
+.llms{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.llm{display:flex;gap:9px;align-items:center;padding:9px;border:1px solid var(--line);border-radius:8px;background:rgba(3,11,23,.45)}
+.llm b{font-size:12px;display:block} .llm small{font-size:10px}
+
+/* bottom bar */
+.bottom{grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:8px 12px}
+.chip{display:flex;gap:10px;align-items:center;padding:6px 14px 6px 10px;border:1px solid var(--line);border-radius:8px;background:rgba(3,11,23,.5);min-width:150px}
+.chip svg{width:16px;height:16px;stroke:var(--cyan);fill:none;stroke-width:1.7;flex:none}
+.chip small{display:block;font-size:9.5px;color:var(--muted)} .chip b{font-size:11.5px;font-weight:600}
+.dots{flex:1;height:2px;background:repeating-linear-gradient(90deg,var(--line-strong) 0 3px,transparent 3px 9px)}
+.talk{border:1.5px solid var(--cyan);border-radius:30px;padding:8px 40px;text-align:center;box-shadow:var(--glow),inset 0 0 20px rgba(34,211,238,.2);background:rgba(8,51,68,.5)}
+.talk b{font:700 13px var(--display);letter-spacing:.14em;color:var(--cyan-soft);display:block}
+.talk small{font-size:10px;color:var(--muted)}
+
+/* ---------- workflow view (reference image 2) ---------- */
+#flow{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px;height:100%}
+.graph{display:flex;flex-direction:column;min-height:560px}
+.graph svg{flex:1;width:100%}
+.node rect{fill:rgba(8,26,48,.95);stroke:var(--line-strong);stroke-width:1.2}
+.node text{fill:var(--text);font:600 13px var(--ui);text-anchor:middle;dominant-baseline:central}
+.node.hit rect{stroke:var(--cyan);fill:rgba(14,116,144,.35)}
+.node.pend rect{stroke-dasharray:4 3}
+.node.gate rect{stroke:var(--amber);fill:rgba(120,80,0,.25)}
+.edge{fill:none;stroke:var(--cyan-soft);stroke-width:1.4;opacity:.7}
+.trace{font:12px/1.55 ui-monospace,Consolas,monospace;overflow:auto;max-height:620px}
+.trace details{border-left:1px solid var(--line);padding-left:12px;margin:4px 0 4px 6px}
+.trace summary{cursor:pointer;color:var(--cyan-soft);list-style:none}
+.trace summary::before{content:"▸ ";color:var(--dim)} .trace details[open]>summary::before{content:"▾ "}
+.trace .k{color:var(--muted)} .trace .v{color:var(--text)}
+.input{display:flex;gap:8px;align-items:center;margin-top:10px;border-top:1px solid var(--line);padding-top:10px}
+.input .btn.go{background:rgba(52,211,153,.15);border-color:var(--green);color:var(--green)}
+
+/* placeholders */
+.ph-view{place-items:center;min-height:500px;text-align:center}
+.ph-view p{color:var(--muted);max-width:420px;margin-top:8px}
+
+@media (max-width:1200px){
+  .c3,.c4,.c5{grid-column:span 6} .c6{grid-column:span 12}
+  .search{display:none}
+}
+@media (max-width:820px){
+  .shell{grid-template-columns:minmax(0,1fr);grid-template-rows:auto;padding:12px 16px}
+  .side{grid-row:auto} .voice{display:none}
+  nav{flex-direction:row;overflow-x:auto} .nav .n,.nav .soon,.navsep{display:none}
+  .c2,.c3,.c4,.c5,.c6{grid-column:span 12}
+  .top{flex-wrap:wrap} .op small{display:none}
+  .agents{grid-template-columns:minmax(0,1fr)}
+  #flow{grid-template-columns:minmax(0,1fr)}
+  .bottom{flex-wrap:wrap} .dots{display:none} .talk{order:-1;width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ================= SIDEBAR ================= -->
+<aside class="side">
+  <div class="brand">
+    <div class="mark"><i></i></div>
+    <div><b>M.A.R.C</b><small>Malone Autonomous<br>Response Centre</small></div>
+  </div>
+  <nav class="panel" style="padding:8px">
+    <button class="nav on" data-view="dash"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Command Centre</button>
+    <div class="navsep">Modules</div>
+    <button class="nav" data-view="jobs"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Job Hunter<span class="n">0</span></button>
+    <button class="nav" data-view="tracker"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="18" r="1.2"/></svg>Tracker</button>
+    <button class="nav" data-view="invest"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Investments</button>
+    <button class="nav" data-view="watch"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Watchlist</button>
+    <div class="navsep">System</div>
+    <button class="nav" data-view="flow"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7.5 8l3.5 8M16.5 8L13 16"/></svg>Workflows</button>
+    <button class="nav" data-view="agents"><svg viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="11" rx="2"/><path d="M12 8V4M9 13h.01M15 13h.01"/></svg>Agents</button>
+    <button class="nav" data-view="skills"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>Tools &amp; Skills<span class="n" id="skillCount">6</span></button>
+    <button class="nav" data-view="soon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar<span class="soon">Soon</span></button>
+    <button class="nav" data-view="soon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Memory<span class="soon">Soon</span></button>
+    <button class="nav" data-view="soon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/></svg>Knowledge Base<span class="soon">Soon</span></button>
+  </nav>
+  <div class="panel voice">
+    <div class="ph"><h2>Voice Status</h2><span class="tag t-off">Preview</span></div>
+    <div class="wave" id="wave"></div>
+    <small class="mu">Standing by…</small>
+    <div class="mic"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
+    <small class="mu">Voice coming in a later version</small>
+    <div style="margin-top:12px"><button class="btn" style="width:100%"><svg class="bi" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>Focus Mode</button></div>
+  </div>
+</aside>
+
+<!-- ================= TOP BAR ================= -->
+<header class="top">
+  <div class="status"><span>SYSTEM STATUS</span><span class="dot"></span><em>OPTIMAL</em></div>
+  <div class="clock"><small id="date">—</small><b id="time">--:--:--</b></div>
+  <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input placeholder="Search roles, tickers, skills…"></label>
+  <button class="ib" title="Notifications"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+  <button class="ib" title="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  <div class="op"><div><b>Malone</b><small>Commander</small></div><div class="av">M</div></div>
+</header>
+
+<!-- ================= MAIN ================= -->
+<main>
+
+<!-- ---------- DASHBOARD ---------- -->
+<section class="view on" id="dash">
+
+  <div class="panel c3">
+    <div class="ph"><h2>Core Overview</h2></div>
+    <div class="list">
+      <div class="row"><span class="ico cy"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span><div class="grow"><b>Job Hunter</b><small class="cy">Awaiting CV</small></div></div>
+      <div class="row"><span class="ico gr"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg></span><div class="grow"><b>Applications</b><small class="gr">0 today · 0 this week</small></div></div>
+      <div class="row"><span class="ico vi"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/></svg></span><div class="grow"><b>Investments</b><small class="vi">Stocks &amp; Shares ISA</small></div></div>
+      <div class="row"><span class="ico am"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span><div class="grow"><b>Watchlist</b><small class="am">6 watching · 0 added here</small></div></div>
+      <div class="row"><span class="ico cy"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg></span><div class="grow"><b>Skills</b><small class="cy">6 installed · 2 pending</small></div></div>
+      <div class="row"><span class="ico gr"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></span><div class="grow"><b>System</b><small class="gr">Optimal</small></div></div>
+    </div>
+  </div>
+
+  <div class="panel c6 core">
+    <svg viewBox="0 0 800 340" role="img" aria-label="M.A.R.C core">
+      <defs>
+        <radialGradient id="sph" cx="50%" cy="45%" r="55%"><stop offset="0" stop-color="#0e7490" stop-opacity=".55"/><stop offset=".7" stop-color="#083344" stop-opacity=".35"/><stop offset="1" stop-color="#22d3ee" stop-opacity=".25"/></radialGradient>
+        <radialGradient id="halo"><stop offset=".6" stop-color="#22d3ee" stop-opacity=".18"/><stop offset="1" stop-color="#22d3ee" stop-opacity="0"/></radialGradient>
+        <filter id="gl"><feGaussianBlur stdDeviation="3"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <ellipse cx="400" cy="300" rx="260" ry="26" fill="none" stroke="#22d3ee" stroke-opacity=".25"/>
+      <ellipse cx="400" cy="300" rx="200" ry="18" fill="none" stroke="#22d3ee" stroke-opacity=".35" stroke-dasharray="2 6"/>
+      <circle cx="400" cy="170" r="185" fill="url(#halo)"/>
+      <g class="spin2"><ellipse cx="400" cy="170" rx="330" ry="80" fill="none" stroke="#7dd3fc" stroke-opacity=".25" transform="rotate(-12 400 170)"/><circle cx="85" cy="230" r="3" fill="#22d3ee" filter="url(#gl)"/></g>
+      <circle cx="400" cy="170" r="140" fill="url(#sph)" stroke="#22d3ee" stroke-opacity=".6"/>
+      <g fill="none" stroke="#22d3ee" stroke-opacity=".22">
+        <ellipse cx="400" cy="170" rx="140" ry="40"/><ellipse cx="400" cy="170" rx="140" ry="85"/>
+        <ellipse cx="400" cy="170" rx="40" ry="140"/><ellipse cx="400" cy="170" rx="90" ry="140"/>
+        <line x1="260" y1="170" x2="540" y2="170"/><line x1="400" y1="30" x2="400" y2="310"/>
+      </g>
+      <g class="spin"><ellipse cx="400" cy="170" rx="250" ry="62" fill="none" stroke="#22d3ee" stroke-opacity=".4" transform="rotate(14 400 170)"/><circle cx="645" cy="200" r="4" fill="#67e8f9" filter="url(#gl)"/><circle cx="160" cy="130" r="2.5" fill="#67e8f9" filter="url(#gl)"/></g>
+      <g fill="#a5f3fc" filter="url(#gl)" class="pulse"><circle cx="330" cy="95" r="2"/><circle cx="470" cy="250" r="2"/><circle cx="505" cy="110" r="1.6"/><circle cx="300" cy="235" r="1.6"/></g>
+      <text x="400" y="160" text-anchor="middle" font-family="Orbitron,sans-serif" font-weight="700" font-size="54" letter-spacing="14" fill="#cffafe" filter="url(#gl)">M.A.R.C</text>
+      <text x="400" y="200" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="12" letter-spacing="6" fill="#7dd3fc">RESPONSE CENTRE</text>
+      <text x="400" y="222" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#7f9bb8">v0.1 · mockup</text>
+    </svg>
+  </div>
+
+  <div class="panel c3">
+    <div class="ph"><h2>Live Intelligence</h2><span class="tag t-warn">Sample</span></div>
+    <div class="list">
+      <div class="row"><span class="ico cy"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span><div class="grow"><b>Upload your CV to start Module 1</b><small class="mu">Job Hunter</small></div><span class="tag t-info">Next</span></div>
+      <div class="row"><span class="ico am"><svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span><div class="grow"><b>12 tailored CVs await approval</b><small class="mu">Application queue</small></div><span class="tag t-warn">Review</span></div>
+      <div class="row"><span class="ico gr"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/></svg></span><div class="grow"><b>3 new research cards ready</b><small class="mu">Investment researcher</small></div><span class="tag t-tip">New</span></div>
+      <div class="row"><span class="ico cy"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span><div class="grow"><b>2 follow-ups due today</b><small class="mu">Tracker</small></div><span class="tag t-info">Due</span></div>
+      <div class="row"><span class="ico vi"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg></span><div class="grow"><b>browser-use decision pending</b><small class="mu">Skills</small></div><span class="tag t-tip">Tip</span></div>
+    </div>
+    <div style="text-align:right;margin-top:8px"><span class="sample">SAMPLE DATA</span></div>
+  </div>
+
+  <div class="panel c5">
+    <div class="ph"><h2>Active Agents</h2><button class="link" data-goto="agents">View all ›</button></div>
+    <div class="agents" id="agents"></div>
+  </div>
+
+  <div class="panel c4">
+    <div class="ph"><h2>Mission Timeline</h2><span class="mu" style="font-size:11px">Today ▾</span></div>
+    <div class="tl">
+      <div class="tli"><time>09:00</time><i></i><b>Daily role sweep (7 sites)</b><span>Done</span></div>
+      <div class="tli"><time>10:00</time><i></i><b>Approve application batch</b><span>In 42m</span></div>
+      <div class="tli"><time>13:00</time><i class="am"></i><b>Follow-ups: 2 recruiters</b><span>In 3h</span></div>
+      <div class="tli"><time>18:00</time><i></i><b>Research cards: new batch</b><span>In 8h</span></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:14px"><span class="sample">SAMPLE DATA</span><button class="link">View full schedule ›</button></div>
+  </div>
+
+  <div class="panel c3">
+    <div class="ph"><h2>Quick Commands</h2></div>
+    <div class="list">
+      <button class="qc"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>Upload CV</button>
+      <button class="qc"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Find new roles</button>
+      <button class="qc"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>Review approval queue</button>
+      <button class="qc"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/></svg>Research new ideas</button>
+    </div>
+  </div>
+
+  <div class="panel c4">
+    <div class="ph"><h2>Mission Metrics</h2><span class="sample">SAMPLE DATA</span></div>
+    <div class="rings" id="rings"></div>
+  </div>
+
+  <div class="panel c4">
+    <div class="ph"><h2>Installed Skills</h2><button class="link" data-goto="skills">Manage ›</button></div>
+    <div class="list" id="skillsMini"></div>
+  </div>
+
+  <div class="panel c4">
+    <div class="ph"><h2>AI Link Status</h2><span class="tag t-live">3 Connected</span></div>
+    <div class="llms">
+      <div class="llm"><span class="ico am"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/></svg></span><div><b>Claude</b><small class="gr">Connected</small></div></div>
+      <div class="llm"><span class="ico cy"><svg viewBox="0 0 24 24"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M13 6l-2 12"/></svg></span><div><b>Claude Code</b><small class="gr">Connected</small></div></div>
+      <div class="llm"><span class="ico cy"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/></svg></span><div><b>Claude in Chrome</b><small class="gr">Connected</small></div></div>
+      <div class="llm"><span class="ico mu"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></span><div><b>ChatGPT</b><small class="mu">Not linked</small></div></div>
+      <div class="llm"><span class="ico mu"><svg viewBox="0 0 24 24"><path d="M12 3c1 5 4 8 9 9-5 1-8 4-9 9-1-5-4-8-9-9 5-1 8-4 9-9z"/></svg></span><div><b>Gemini</b><small class="mu">Not linked</small></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ---------- WORKFLOWS (reference image 2) ---------- -->
+<section class="view" id="flow">
+  <div class="panel graph">
+    <div class="ph"><h2>Workflow · Job Application Pipeline</h2><span class="sample">SAMPLE RUN</span></div>
+    <svg viewBox="0 0 520 560" role="img" aria-label="Job application pipeline graph">
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5 0 10z" fill="#7dd3fc"/></marker></defs>
+      <path class="edge" d="M260 62V98" marker-end="url(#ar)"/>
+      <path class="edge" d="M260 142V178" marker-end="url(#ar)"/>
+      <path class="edge" d="M260 222V258" marker-end="url(#ar)"/>
+      <path class="edge" d="M260 302V338" marker-end="url(#ar)"/>
+      <path class="edge" d="M260 382V418" marker-end="url(#ar)"/>
+      <path class="edge" d="M260 462V498" marker-end="url(#ar)"/>
+      <path class="edge" d="M330 200C430 200 430 120 340 120" stroke-dasharray="4 4" marker-end="url(#ar)"/>
+      <text x="438" y="164" fill="#7f9bb8" font-size="10" font-family="Inter">discard &lt; 70</text>
+      <g class="node"><rect x="190" y="22" width="140" height="40" rx="8"/><text x="260" y="42">__start__</text></g>
+      <g class="node hit"><rect x="170" y="100" width="180" height="42" rx="8"/><text x="260" y="121">Search 7 job sites</text></g>
+      <g class="node hit"><rect x="170" y="180" width="180" height="42" rx="8"/><text x="260" y="201">Score fit</text></g>
+      <g class="node hit"><rect x="170" y="260" width="180" height="42" rx="8"/><text x="260" y="281">Tailor CV + note</text></g>
+      <g class="node gate"><rect x="170" y="340" width="180" height="42" rx="8"/><text x="260" y="361">You approve</text></g>
+      <g class="node pend"><rect x="170" y="420" width="180" height="42" rx="8"/><text x="260" y="441">You submit</text></g>
+      <g class="node"><rect x="190" y="500" width="140" height="40" rx="8"/><text x="260" y="520">Log to tracker</text></g>
+    </svg>
+    <div class="input"><span class="mu">Input</span><span style="flex:1"></span><button class="btn">Manage configuration</button><button class="btn go"><svg class="bi" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>Run</button></div>
+  </div>
+  <div class="panel trace">
+    <div class="ph"><h2>Run Log</h2><span class="mu" style="font-size:11px">Thread 0fb91d99 · Pretty ▾</span></div>
+    <details open><summary>STEP 1 · Search 7 job sites</summary>
+      <div><span class="k">query</span> <span class="v">"SDR" OR "BDR" graduate London</span></div>
+      <div><span class="k">sites</span> <span class="v">LinkedIn, Indeed, Totaljobs, Reed, Adzuna, WttJ, Handshake</span></div>
+      <div><span class="k">found</span> <span class="v">148 roles</span></div>
+    </details>
+    <details open><summary>STEP 2 · Score fit</summary>
+      <details><summary>Graduate SDR · Example Fintech Ltd</summary>
+        <div><span class="k">score</span> <span class="v">0.86</span></div><div><span class="k">salary</span> <span class="v">£27,000 + OTE</span></div><div><span class="k">mode</span> <span class="v">Hybrid · London</span></div>
+      </details>
+      <details><summary>Associate BDR · Example SaaS Co</summary>
+        <div><span class="k">score</span> <span class="v">0.81</span></div>
+      </details>
+      <div><span class="k">kept</span> <span class="v">41</span> · <span class="k">discarded</span> <span class="v">107</span></div>
+    </details>
+    <details open><summary>STEP 3 · Tailor CV + note</summary>
+      <div><span class="k">template</span> <span class="v">master-cv · variant "SDR"</span></div>
+      <div><span class="k">skills used</span> <span class="v">copywriting, stop-slop</span></div>
+    </details>
+    <details open><summary>STEP 4 · You approve</summary>
+      <div class="am">Paused, waiting for you: 41 applications ready to review</div>
+      <div style="margin-top:8px;display:flex;gap:8px"><button class="btn go" style="border-color:var(--green);color:var(--green)">Continue</button><button class="btn">Open queue</button></div>
+    </details>
+  </div>
+</section>
+
+<!-- ---------- SKILLS ---------- -->
+<section class="view" id="skills" style="grid-template-columns:minmax(0,1fr);gap:12px">
+  <div class="panel">
+    <div class="ph"><h2>Tools &amp; Skills</h2><span class="mu" style="font-size:11px">Every skill is reviewed before install</span></div>
+    <div class="list" id="skillsFull"></div>
+  </div>
+</section>
+
+<!-- ---------- PLACEHOLDERS ---------- -->
+<section class="view ph-view panel" id="ph">
+  <div><h2 style="font:700 16px var(--display);letter-spacing:.12em;color:var(--cyan-soft)" id="phTitle">Coming soon</h2><p id="phText">This screen gets built in its module.</p></div>
+</section>
+
+</main>
+
+<!-- ================= BOTTOM BAR ================= -->
+<footer class="panel bottom">
+  <div class="chip"><svg viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg><div><small>Location</small><b>London, UK</b></div></div>
+  <div class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><div><small>Weather</small><b id="wx">Loading…</b></div></div>
+  <div class="chip"><svg viewBox="0 0 24 24"><path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M2 9a15 15 0 0 1 20 0M12 20h.01"/></svg><div><small>Network</small><b id="net">—</b></div></div>
+  <div class="dots"></div>
+  <div class="talk"><b>TALK TO M.A.R.C</b><small>Voice preview · coming later</small></div>
+  <div class="dots"></div>
+  <button class="btn"><svg class="bi" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Executive Briefing</button>
+</footer>
+</div>
+
+<script>
+// ---- installed skills (mirrors data/skills.json) ----
+const SKILLS=[
+  {name:"stop-slop",purpose:"Strips AI-sounding phrasing from CVs and cover notes",src:"hardikpandya/stop-slop",status:"Installed"},
+  {name:"copywriting",purpose:"Sharper headlines, summaries and cover notes",src:"coreyhaines31/marketingskills",status:"Installed"},
+  {name:"copy-editing",purpose:"Final line-by-line editing pass",src:"coreyhaines31/marketingskills",status:"Installed"},
+  {name:"cold-email",purpose:"Short outreach and follow-ups to recruiters",src:"coreyhaines31/marketingskills",status:"Installed"},
+  {name:"context-engineering",purpose:"/generate-prp and /execute-prp build commands",src:"coleam00/context-engineering-intro",status:"Installed"},
+  {name:"ui-ux-pro-max",purpose:"Design system and UX rules for the dashboard",src:"nextlevelbuilder/ui-ux-pro-max-skill",status:"Installed"},
+  {name:"browser-use",purpose:"Browser automation (decide at Module 1)",src:"browser-use/browser-use",status:"Pending"},
+  {name:"supermemory",purpose:"Cloud memory service (skipped for now)",src:"supermemoryai/supermemory",status:"Skipped"}
+];
+const tagFor=s=>s==="Installed"?"t-live":s==="Pending"?"t-warn":"t-off";
+const skillHTML=s=>`<div class="skill"><b>${s.name}</b><span class="tag ${tagFor(s.status)}">${s.status}</span><small>${s.purpose}</small><a href="https://github.com/${s.src}" target="_blank" rel="noopener">github.com/${s.src}</a></div>`;
+const installed=SKILLS.filter(s=>s.status==="Installed");
+document.getElementById('skillsMini').innerHTML=installed.slice(0,4).map(s=>`<div class="row" style="padding:6px 9px"><div class="grow"><b>${s.name}</b><small class="mu">${s.src}</small></div><span class="tag t-live">On</span></div>`).join('')+`<small class="mu" style="text-align:right">+${installed.length-4} more · 2 pending</small>`;
+document.getElementById('skillsFull').innerHTML=SKILLS.map(skillHTML).join('');
+document.getElementById('skillCount').textContent=SKILLS.filter(s=>s.status==="Installed").length;
+
+// ---- agents ----
+const AGENTS=[
+  ["Job Scout","Active","gr","M11 11m-7 0a7 7 0 1 0 14 0a7 7 0 1 0-14 0M20 20l-3.5-3.5"],
+  ["CV Tailor","Active","gr","M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h5"],
+  ["Approvals","Waiting on you","am","M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"],
+  ["Researcher","Standby","cy","M3 17l6-6 4 4 8-8M15 7h6v6"],
+  ["Watcher","Standby","cy","M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6"],
+  ["Browser","Standby","vi","M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"]
+];
+document.getElementById('agents').innerHTML=AGENTS.map(([n,s,c,d])=>{
+  const bars=Array.from({length:40},()=>`<i style="height:${3+Math.round(Math.random()*14)}px"></i>`).join('');
+  return `<div class="agent"><span class="ico ${c}"><svg viewBox="0 0 24 24"><path d="${d}"/></svg></span><div style="min-width:0"><b>${n}</b><small class="${c}">${s}</small></div><span class="spark ${c}">${s==="Standby"?"":bars}</span></div>`}).join('');
+
+// ---- metric rings ----
+const RINGS=[["Response rate",18,"var(--cyan)","18%"],["Applied today (of 100)",62,"var(--green)","62"],["ISA goal (of £10k)",34,"var(--violet)","£3.4k"]];
+document.getElementById('rings').innerHTML=RINGS.map(([l,p,c,v])=>{const C=2*Math.PI*36;return `<div class="ring"><svg viewBox="0 0 92 92"><circle cx="46" cy="46" r="36" fill="none" stroke="rgba(56,189,248,.12)" stroke-width="7"/><circle cx="46" cy="46" r="36" fill="none" stroke="${c}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${(C*p/100).toFixed(1)} ${C.toFixed(1)}" style="filter:drop-shadow(0 0 4px ${c})"/></svg><div class="lbl"><b>${v}</b></div><p>${l}</p></div>`}).join('');
+
+// ---- voice wave (look only) ----
+document.getElementById('wave').innerHTML=Array.from({length:34},(_,i)=>`<span style="height:${6+Math.round(Math.abs(Math.sin(i*.7))*22)}px;animation-delay:${(i*.05).toFixed(2)}s"></span>`).join('');
+
+// ---- clock (London time) ----
+const tz='Europe/London';
+function tick(){const d=new Date();
+  document.getElementById('date').textContent=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:tz});
+  document.getElementById('time').textContent=d.toLocaleTimeString('en-GB',{timeZone:tz});}
+tick();setInterval(tick,1000);
+
+// ---- live weather: Open-Meteo, no key needed ----
+const WX={0:"Clear",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",45:"Fog",48:"Fog",51:"Drizzle",53:"Drizzle",55:"Drizzle",61:"Light rain",63:"Rain",65:"Heavy rain",71:"Snow",73:"Snow",75:"Snow",80:"Showers",81:"Showers",82:"Heavy showers",95:"Thunderstorm"};
+async function weather(){try{const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=51.5074&longitude=-0.1278&current=temperature_2m,weather_code');const j=await r.json();
+  document.getElementById('wx').textContent=`${Math.round(j.current.temperature_2m)}°C ${WX[j.current.weather_code]||''}`.trim();}catch(e){document.getElementById('wx').textContent='Unavailable';}}
+weather();setInterval(weather,15*60*1000);
+
+// ---- live network ----
+function net(){const c=navigator.connection;const el=document.getElementById('net');
+  if(!navigator.onLine){el.textContent='Offline';el.className='rd';return;}
+  el.className='gr';el.textContent=c&&c.downlink?`Online · ${c.downlink} Mbps`:'Online';}
+net();addEventListener('online',net);addEventListener('offline',net);if(navigator.connection)navigator.connection.addEventListener('change',net);
+
+// ---- view switching ----
+const PH={jobs:["Job Hunter","Module 1: CV intake, 20 target roles, master CV and the application queue."],tracker:["Tracker","Module 1: every application with status, follow-ups, and daily/weekly totals."],invest:["Investment Research","Module 2: research cards with YES / NO for Trading 212 ISA instruments."],watch:["Watchlist","Module 2: everything you said YES to, with date and reason."],agents:["Agents","Each agent's status and recent runs."],soon:["Coming later","Placeholder: built after Modules 1 and 2."]};
+function show(v){document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));
+  const real=document.getElementById(v);
+  if(real&&v!=='ph'){real.classList.add('on');}else{const [t,x]=PH[v]||PH.soon;document.getElementById('phTitle').textContent=t;document.getElementById('phText').textContent=x;document.getElementById('ph').classList.add('on');}}
+document.querySelectorAll('.nav').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('on'));b.classList.add('on');show(b.dataset.view);}));
+if(location.hash){const b=document.querySelector(`.nav[data-view="${location.hash.slice(1)}"]`);if(b)b.click();}
+document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>document.querySelector(`.nav[data-view="${b.dataset.goto}"]`).click()));
+</script>
+</body>
+</html>

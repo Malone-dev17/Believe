@@ -47,14 +47,18 @@
       "modules": ["Build process"],
       "notes": "Its settings.local.json (pre-approved commands) was deliberately NOT installed."
     }
+    ,{
+      "name": "ui-ux-pro-max",
+      "purpose": "Design system and UX checklist for the dashboard",
+      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+      "license": "MIT",
+      "installed": "2026-10-02",
+      "location": ".claude/skills/ui-ux-pro-max",
+      "modules": ["Dashboard design"],
+      "notes": "Test files left out. Scripts checked: local-only, no network access. Needs Python 3.12 (installed)."
+    }
   ],
   "pending": [
-    {
-      "name": "ui-ux-pro-max",
-      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "when": "Layout mockup step",
-      "needs": "Python 3"
-    },
     {
       "name": "browser-use",
       "source": "https://github.com/browser-use/browser-use",
