@@ -14,6 +14,7 @@ Personal dashboard for running and monitoring AI-assisted workflows. Opens in a 
 - Personal data (CVs, applications, holdings) lives in `private/` and is git-ignored. Never commit it.
 
 ## Layout
+- `MARC/`: the dashboard page (published via GitHub Pages; public, so never put personal data in it)
 - `.claude/skills/`: installed skills
 - `.claude/commands/`: slash commands (`/generate-prp`, `/execute-prp`)
 - `PRPs/`: build plans; `docs/`: reference material and licences
