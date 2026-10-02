@@ -1,0 +1,11 @@
+# Personal data: CVs, applications, holdings. Never pushed to GitHub.
+private/
+*.env
+.env*
+.claude/settings.local.json
+node_modules/
+__pycache__/
+.venv/
+
+# Duplicate licence copies (originals in docs/licenses)
+.claude/skills/_licenses/
