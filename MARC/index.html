@@ -335,6 +335,7 @@ body.v-listening .talk{border-color:var(--green);box-shadow:0 0 22px rgba(52,211
       <select id="voiceSel" title="M.A.R.C's voice" style="flex:1;min-width:0;background:rgba(3,11,23,.7);border:1px solid var(--line);border-radius:8px;color:var(--text);font:11px var(--ui);padding:6px"></select>
       <button class="btn sm" id="newChat" title="Start a new conversation">New</button>
     </div>
+    <button class="btn sm" id="wakeBtn" style="width:100%;margin-top:6px" aria-pressed="false" title="Listen for 'Hey MARC' while this tab is open">"Hey MARC": Off</button>
   </div>
 </aside>
 
@@ -350,6 +351,13 @@ body.v-listening .talk{border-color:var(--green);box-shadow:0 0 22px rgba(52,211
 
 <!-- ================= MAIN ================= -->
 <main>
+<div class="panel" id="morningBar" style="display:none;margin-bottom:12px;border-color:var(--green)">
+  <div class="bar" style="justify-content:space-between">
+    <div><b style="font:700 12px var(--display);letter-spacing:.1em;color:var(--green)" id="morningHi">GOOD MORNING</b>
+    <p class="mu" style="font-size:12px;margin-top:4px">Your daily briefing is ready: applications, roles to approve, follow-ups and research.</p></div>
+    <div class="acts"><button class="btn ok" id="morningPlay">▶ Hear today's briefing</button><button class="btn sm" id="morningSkip">Not now</button></div>
+  </div>
+</div>
 <div class="panel" id="onlineBanner" style="display:none;margin-bottom:12px;border-color:var(--cyan)">
   <div class="bar" style="justify-content:space-between">
     <div><b style="font:700 12px var(--display);letter-spacing:.1em;color:var(--cyan-soft)">ONLINE PREVIEW</b>
@@ -367,7 +375,7 @@ body.v-listening .talk{border-color:var(--green);box-shadow:0 0 22px rgba(52,211
       <div class="row"><span class="ico cy"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></span><div class="grow"><b>Job Hunter</b><small class="cy">Awaiting CV</small></div></div>
       <div class="row"><span class="ico gr"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg></span><div class="grow"><b>Applications</b><small class="gr">0 today · 0 this week</small></div></div>
       <div class="row"><span class="ico vi"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/></svg></span><div class="grow"><b>Investments</b><small class="vi">Stocks &amp; Shares ISA</small></div></div>
-      <div class="row"><span class="ico am"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span><div class="grow"><b>Watchlist</b><small class="am">6 watching · 0 added here</small></div></div>
+      <div class="row"><span class="ico am"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span><div class="grow"><b>Watchlist</b><small class="am" id="watchRow">Your YES list</small></div></div>
       <div class="row"><span class="ico cy"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg></span><div class="grow"><b>Skills</b><small class="cy" id="skillsRow">Installed skills</small></div></div>
       <div class="row"><span class="ico gr"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></span><div class="grow"><b>System</b><small class="gr">Optimal</small></div></div>
     </div>
@@ -630,6 +638,7 @@ const SKILLS=[
   {name:"cold-email",purpose:"Short outreach and follow-ups to recruiters",src:"coreyhaines31/marketingskills",status:"Installed"},
   {name:"context-engineering",purpose:"/generate-prp and /execute-prp build commands",src:"coleam00/context-engineering-intro",status:"Installed"},
   {name:"ui-ux-pro-max",purpose:"Design system and UX rules for the dashboard",src:"nextlevelbuilder/ui-ux-pro-max-skill",status:"Installed"},
+  {name:"assisted-apply",purpose:"Fills employer application forms in Chrome; you click Submit (built for M.A.R.C)",src:"dolarewaju/Believe",status:"Installed"},
   {name:"research-investments",purpose:"Builds sourced, balanced research cards for the Investments screen (built for M.A.R.C)",src:"dolarewaju/Believe",status:"Installed"},
   {name:"import-job-alerts",purpose:"Pulls jobs from your alert emails into the queue (built for M.A.R.C)",src:"dolarewaju/Believe",status:"Installed"},
   {name:"browser-use",purpose:"Not needed: Claude in Chrome covers employer forms",src:"browser-use/browser-use",status:"Skipped"},
@@ -884,6 +893,7 @@ async function ask(text){
   text=(text||'').trim();if(!text)return;
   if(!LOCAL){vState('offline');return toast('Voice works when M.A.R.C is open on your laptop.');}
   if(V.busy)return toast('Still working on your last request…');
+  if(await localIntent(text))return;
   V.busy=true;vLog('you',text);const wait=vLog('marc','Working on it…','wait');vState('thinking');
   try{
     const {task}=await api('/api/voice',{text,session:V.session});
@@ -918,8 +928,57 @@ document.addEventListener('keyup',e=>{if(e.code==='Space'&&V.state==='listening'
 vEl('vform').addEventListener('submit',e=>{e.preventDefault();const t=vEl('vinput').value;vEl('vinput').value='';ask(t);});
 vEl('vlogClose').addEventListener('click',()=>vEl('voiceLog').classList.remove('on'));
 vEl('newChat').addEventListener('click',()=>{V.session=null;store.set('marcSession',null);vEl('vmsgs').innerHTML='';toast('New conversation started.');});
-vEl('briefBtn').addEventListener('click',()=>ask('Give me my executive briefing for today: applications, roles waiting for approval, follow-ups due, and research cards to review.'));
-READY.then(()=>vState(LOCAL?'idle':'offline'));
+// ---- instant commands handled on this laptop (no Claude usage) ----
+const todayKey=()=>new Date().toLocaleDateString('en-CA');
+async function speakBriefing(){
+  if(!LOCAL)return toast('Open M.A.R.C on your laptop for your briefing.');
+  const {text}=await api('/api/briefing');vLog('marc',text);speak(text);store.set('marcBriefDay',todayKey());vEl('morningBar').style.display='none';
+}
+async function openNext(){
+  await loadJobs();const next=JOBS.filter(j=>j.status==='approved').sort((a,b)=>(b.score||0)-(a.score||0))[0];
+  if(!next){const t='You have no approved roles waiting. Approve some in Job Hunter first.';vLog('marc',t);return speak(t);}
+  const d=vLog('marc','');const manual=/linkedin|indeed|totaljobs/i.test(next.url+next.source);
+  d.innerHTML=`Next: <b>${esc(next.title)}</b> at ${esc(next.company)}.<div class="acts" style="margin-top:6px"><a class="btn sm" href="${esc(next.url)}" target="_blank" rel="noopener">Open advert ↗</a><a class="btn sm" href="/${esc(next.cv_file)}" download>Download CV</a><button class="btn sm" data-copynote="${next.id}">Copy note</button><button class="btn ok sm" data-applied="${next.id}">Mark applied</button></div>`;
+  speak(`Next up is ${next.title} at ${next.company.split('(')[0]}. Use the buttons in the chat panel to open it and copy your note.${manual?' This one is on a job board, so you apply yourself.':' Say start applying in a Claude session if you want me to fill the form.'}`);
+}
+vEl('vmsgs').addEventListener('click',async e=>{
+  const c=e.target.closest('[data-copynote]');if(c){const j=JOBS.find(x=>x.id===c.dataset.copynote);await navigator.clipboard.writeText(j.note);return toast('Cover note copied.');}
+  const a=e.target.closest('[data-applied]');if(a){await api('/api/jobs/update',{ids:[a.dataset.applied],status:'applied'});a.textContent='Applied ✓';a.disabled=true;toast('Logged as applied. Follow-up set for 7 days.');loadJobs();}
+});
+async function localIntent(text){
+  const t=text.toLowerCase();
+  if(/\b(brief|briefing|my day|today'?s summary|what'?s (on )?today)\b/.test(t)&&t.length<80){vLog('you',text);await speakBriefing();return true;}
+  if(/\bopen (the |my )?next (application|job|role)\b/.test(t)){vLog('you',text);await openNext();return true;}
+  return false;
+}
+vEl('briefBtn').addEventListener('click',speakBriefing);
+
+// ---- "Hey MARC" wake word (off by default: Chrome sends what the mic hears to Google while it's on) ----
+const WAKE=/\b(?:hey|hi|ok|okay)[\s,]+(?:marc|mark|marq|marcs|m\.?\s?a\.?\s?r\.?\s?c\.?)\b[\s,.!?]*/i;
+const W={on:store.get('marcWake')==='on',rec:null};
+function wakeBtnUpdate(){const b=vEl('wakeBtn');b.textContent=`"Hey MARC": ${W.on?'On':'Off'}`;b.setAttribute('aria-pressed',W.on);b.classList.toggle('ok',W.on);}
+function wakeStart(){
+  if(!W.on||!SR||!LOCAL||W.rec||V.state!=='idle'||document.hidden)return;
+  const r=new SR();r.lang='en-GB';r.continuous=true;r.interimResults=false;W.rec=r;
+  r.onresult=e=>{const said=e.results[e.results.length-1][0].transcript;const m=said.match(WAKE);if(!m)return;
+    const cmd=said.slice(m.index+m[0].length).trim();wakeStop();
+    if(cmd.length>2)ask(cmd);else{speak('Yes?');const go=()=>{if(V.state==='idle'){listen();}else setTimeout(go,200);};setTimeout(go,300);}};
+  r.onerror=e=>{if(e.error==='not-allowed'){W.on=false;store.set('marcWake','off');wakeBtnUpdate();toast('Microphone blocked, so "Hey MARC" is off.');}};
+  r.onend=()=>{W.rec=null;setTimeout(wakeStart,400);};
+  try{r.start();}catch(e){W.rec=null;}
+}
+function wakeStop(){if(W.rec){const r=W.rec;W.rec=null;r.onend=null;try{r.abort();}catch(e){}}}
+vEl('wakeBtn').addEventListener('click',()=>{W.on=!W.on;store.set('marcWake',W.on?'on':'off');wakeBtnUpdate();if(W.on){toast('Say "Hey MARC" followed by your request. The mic stays on while this tab is open.');wakeStart();}else wakeStop();});
+const _vState=vState;vState=function(s,t){_vState(s,t);if(s==='idle')setTimeout(wakeStart,300);else wakeStop();};
+document.addEventListener('visibilitychange',()=>document.hidden?wakeStop():wakeStart());
+const _listen=listen;listen=function(){wakeStop();_listen();};
+wakeBtnUpdate();
+
+// ---- morning briefing banner (browsers only allow speech after a click) ----
+vEl('morningPlay').addEventListener('click',speakBriefing);
+vEl('morningSkip').addEventListener('click',()=>{store.set('marcBriefDay',todayKey());vEl('morningBar').style.display='none';});
+READY.then(()=>{vState(LOCAL?'idle':'offline');
+  if(LOCAL&&store.get('marcBriefDay')!==todayKey()){const h=new Date().getHours();vEl('morningHi').textContent=h<12?'GOOD MORNING':h<18?'GOOD AFTERNOON':'GOOD EVENING';vEl('morningBar').style.display='block';}});
 
 // ---- dashboard: real numbers when running locally ----
 async function liveDash(){
@@ -930,6 +989,7 @@ async function liveDash(){
   document.querySelectorAll('#rings .ring p')[2].textContent='ISA goal (sample until Module 2)';
   document.querySelector('#rings').closest('.panel').querySelector('.sample').textContent='LIVE';
   const rows=document.querySelectorAll('#dash .c3 .list .row small');
+  try{const inv=await api('/api/invest');const y=inv.cards.filter(c=>c.status==='yes').length,n=inv.cards.filter(c=>c.status==='new').length;document.getElementById('watchRow').textContent=`${y} on watchlist · ${n} to review`;}catch(e){}
   rows[0].textContent=`${st.queued} awaiting approval`;rows[1].textContent=`${st.applied_today} today · ${st.applied_week} this week`;
   const feed=[[`${st.queued} roles await your approval`,'Job Hunter','t-warn','Review'],[`${st.approved} approved, ready to submit`,'Job Hunter','t-info','Submit'],[`${st.follow_ups_due} follow-ups due`,'Tracker','t-info','Due'],[`${st.applied_week} applications this week`,'Tracker','t-tip','Week'],['Next alert import: weekdays 8am','Scheduler','t-live','Auto']];
   const intel=document.querySelector('#dash .c3:nth-of-type(3) .list');

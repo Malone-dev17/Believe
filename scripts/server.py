@@ -88,6 +88,36 @@ def start_voice(text, session=None):
     return task_id
 
 
+def briefing_text():
+    """Spoken daily briefing built from local data only (instant, no Claude usage)."""
+    store = jobs.load_json(jobs.STORE, [])
+    st = stats()
+    today = date.today().isoformat()
+    hour = __import__("datetime").datetime.now().hour
+    greet = "Good morning" if hour < 12 else "Good afternoon" if hour < 18 else "Good evening"
+    queued = sorted([j for j in store if j["status"] == "queued"], key=lambda j: -(j.get("score") or 0))
+    due = [j for j in store if j.get("follow_up") and j["follow_up"] <= today and j["status"] in ("applied", "viewed")]
+    cards = jobs.load_json(invest.CARDS, [])
+    new_cards = sum(1 for c in cards if c["status"] == "new")
+    parts = [f"{greet}, Damilola."]
+    parts.append(f"You've applied to {st['applied_total']} roles in total, {st['applied_week']} this week"
+                 + (f" and {st['applied_today']} today." if st["applied_today"] else "."))
+    if st["interviews"] or st["offers"]:
+        parts.append(f"You have {st['interviews']} interviews and {st['offers']} offers on the go.")
+    if queued:
+        top = queued[0]
+        parts.append(f"{len(queued)} new roles are waiting for approval. The top one is {top['title']} at {top['company'].split('(')[0].strip()}, scoring {top.get('score')}.")
+    if st["approved"]:
+        parts.append(f"{st['approved']} approved roles are ready to submit.")
+    if due:
+        parts.append(f"{len(due)} follow-ups are due, starting with {due[0]['company'].split('(')[0].strip()}.")
+    else:
+        parts.append("No follow-ups are due.")
+    if new_cards:
+        parts.append(f"You also have {new_cards} research cards to review.")
+    return " ".join(parts)
+
+
 def jobs_view():
     out = []
     for j in jobs.load_json(jobs.STORE, []):
@@ -157,6 +187,8 @@ class Handler(SimpleHTTPRequestHandler):
                                "stats": stats()})
         if path == "/api/jobs":
             return self._json(jobs_view())
+        if path == "/api/briefing":
+            return self._json({"text": briefing_text()})
         if path == "/api/voice":
             task = parse_qs(urlparse(self.path).query).get("task", [""])[0]
             return self._json(VOICE_TASKS.get(task, {"status": "unknown"}))
