@@ -30,9 +30,10 @@ NOTES = PRIV / "jobs" / "notes"
 CONFIG = PRIV / "jobs" / "config.json"
 
 DEFAULT_CONFIG = {
+    "api_sources": [],  # add "reed" and/or "adzuna" to switch the official APIs back on
     "location": "London",
     "distance_miles": 25,
-    "salary_floor": 22000,
+    "salary_floor": 24000,
     "keep_threshold": 60,
     "max_days_old": 7,
     "queries": [
@@ -42,7 +43,9 @@ DEFAULT_CONFIG = {
         "lead generation", "customer success associate", "junior account manager",
         "client onboarding", "trainee sales",
     ],
-    "exclude_words": ["commission only", "commission-only", "self-employed", "door to door", "door-to-door"],
+    "exclude_words": ["commission only", "commission-only", "commission based only", "commission-based only",
+                      "100% commission", "uncapped commission only", "ote only", "self-employed",
+                      "door to door", "door-to-door"],
 }
 SENIOR = re.compile(r"\b(senior|sr\.?|head of|director|principal|vp|vice president|manager of)\b", re.I)
 EXPERIENCE = re.compile(r"\b([3-9]|1\d)\+?\s*(?:-\s*\d+\s*)?years?'?(?:\s+[\w-]+){0,4}?\s+experience", re.I)
@@ -52,7 +55,7 @@ ENTRY = re.compile(r"\b(graduate|entry[- ]level|junior|trainee|associate|no expe
 # ------------------------------------------------------------------ storage
 
 def load_json(path, default):
-    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else default
+    return json.loads(path.read_text(encoding="utf-8-sig")) if path.exists() else default
 
 
 def save_json(path, data):
@@ -154,23 +157,83 @@ def fetch_adzuna(cfg, app_id, app_key):
 def fetch():
     cfg, k = config(), keys()
     found, notes = [], []
-    if k.get("REED_API_KEY"):
-        found += fetch_reed(cfg, k["REED_API_KEY"])
-    else:
-        notes.append("Reed skipped: no REED_API_KEY in private/keys.env")
-    if k.get("ADZUNA_APP_ID") and k.get("ADZUNA_APP_KEY"):
-        found += fetch_adzuna(cfg, k["ADZUNA_APP_ID"], k["ADZUNA_APP_KEY"])
-    else:
-        notes.append("Adzuna skipped: no ADZUNA_APP_ID / ADZUNA_APP_KEY in private/keys.env")
+    sources = cfg.get("api_sources", [])
+    if not sources:
+        notes.append("API sources off: jobs come from alert emails and links you add")
+    if "reed" in sources:
+        if k.get("REED_API_KEY"):
+            found += fetch_reed(cfg, k["REED_API_KEY"])
+        else:
+            notes.append("Reed skipped: no REED_API_KEY in private/keys.env")
+    if "adzuna" in sources:
+        if k.get("ADZUNA_APP_ID") and k.get("ADZUNA_APP_KEY"):
+            found += fetch_adzuna(cfg, k["ADZUNA_APP_ID"], k["ADZUNA_APP_KEY"])
+        else:
+            notes.append("Adzuna skipped: no ADZUNA_APP_ID / ADZUNA_APP_KEY in private/keys.env")
     added = merge(found)
     return {"fetched": len(found), "added": added, "notes": notes}
 
 
+def clean_url(url):
+    """Strip tracking and one-time login tokens from job-board links."""
+    m = re.search(r"linkedin\.com/(?:comm/)?jobs/view/(\d+)", url or "")
+    if m:
+        return f"https://www.linkedin.com/jobs/view/{m.group(1)}/"
+    m = re.search(r"indeed\.com/.*?[?&]jk=([0-9a-f]+)", url or "")
+    if m:
+        return f"https://uk.indeed.com/viewjob?jk={m.group(1)}"
+    parts = urllib.parse.urlsplit(url or "")
+    keep = [(k, v) for k, v in urllib.parse.parse_qsl(parts.query)
+            if not re.match(r"(utm_|trk|token|otp|mid|lipi|ref|eid|tracking)", k, re.I)]
+    return urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path, urllib.parse.urlencode(keep), ""))
+
+
+def make_job(url, title, company, description="", source="Manual", location="", salary_min=None, salary_max=None):
+    url = clean_url(url)
+    return {"id": job_id(source.lower(), None, url), "source": source, "title": title.strip(),
+            "company": (company or "").strip(), "location": (location or "").strip(),
+            "salary_min": salary_min, "salary_max": salary_max, "url": url,
+            "description": description or "", "posted": ""}
+
+
 def add_link(url, title, company, description="", source="Manual", location="", salary_min=None):
-    job = {"id": job_id(source.lower(), None, url), "source": source, "title": title, "company": company,
-           "location": location, "salary_min": salary_min, "salary_max": None, "url": url,
-           "description": description, "posted": ""}
-    return merge([job])
+    return merge([make_job(url, title, company, description, source, location, salary_min)])
+
+
+ALERT_NOISE = re.compile(r"^(apply with resume.*|easy apply|actively recruiting|promoted|be an early applicant|"
+                         r"\d+ (?:company )?alumni.*|new|view all jobs.*|https?://.*|-+)$", re.I)
+
+
+def parse_linkedin_alert(text):
+    """Pull jobs out of a LinkedIn job-alert email (plain-text body)."""
+    out = []
+    for block in re.split(r"\n-{10,}\n", text):
+        m = re.search(r"View job:\s*(\S+)", block)
+        if not m:
+            continue
+        before = block[:m.start()].strip().splitlines()
+        lines = [l.strip() for l in before if l.strip() and not ALERT_NOISE.match(l.strip())]
+        if len(lines) >= 3:
+            title, company, location = lines[-3], lines[-2], lines[-1]
+        elif len(lines) == 2:
+            title, company, location = lines[0], lines[1], ""
+        else:
+            continue
+        out.append(make_job(m.group(1), title, company, source="LinkedIn", location=location))
+    return out
+
+
+def import_alerts(items):
+    """items: [{"source": "LinkedIn", "text": "<plain-text email>"} | {"title":…, "company":…, "url":…, …}]"""
+    found = []
+    for it in items:
+        if "text" in it and it.get("source", "").lower() == "linkedin":
+            found += parse_linkedin_alert(it["text"])
+        elif it.get("title") and it.get("url"):
+            found.append(make_job(it["url"], it["title"], it.get("company", ""), it.get("description", ""),
+                                  it.get("source", "Alert"), it.get("location", ""),
+                                  it.get("salary_min"), it.get("salary_max")))
+    return {"parsed": len(found), "added": merge(found)}
 
 
 # ------------------------------------------------------------------ score
@@ -179,11 +242,28 @@ def tokens(s):
     return set(re.findall(r"[a-z]+", (s or "").lower())) - {"and", "the", "of", "a", "to", "in", "for"}
 
 
+# Other names employers use for the same entry-level jobs -> the target role they map to.
+ALIASES = {
+    "account specialist": "Trainee Medical Sales Representative",
+    "hospital sales representative": "Trainee Medical Sales Representative",
+    "healthcare representative": "Trainee Medical Sales Representative",
+    "medical representative": "Trainee Medical Sales Representative",
+    "territory manager": "Trainee Field Sales Representative",
+    "dental sales representative": "Trainee Medical Device Sales Representative",
+    "account development representative": "Sales Development Representative (SDR)",
+    "sales associate": "Graduate Sales Executive",
+    "new business executive": "Business Development Executive (Graduate / Junior)",
+}
+
+
 def best_role(title, roles):
     t = tokens(title)
     best, best_overlap = None, 0.0
-    for role in roles:
-        r = tokens(re.sub(r"\(.*?\)", "", role["title"]))
+    by_title = {r["title"]: r for r in roles}
+    candidates = [(r, r["title"]) for r in roles]
+    candidates += [(by_title[target], alias) for alias, target in ALIASES.items() if target in by_title]
+    for role, name in candidates:
+        r = tokens(re.sub(r"\(.*?\)", "", name))
         overlap = len(t & r) / max(len(r), 1)
         if overlap > best_overlap:
             best, best_overlap = role, overlap
@@ -200,10 +280,14 @@ def score_job(job, roles, cfg):
     score = 30 + round(30 * overlap)
     reasons.append(f"Matches '{role['title']}' ({round(overlap * 100)}% title match)")
 
-    hits = [kw for kw in role["keywords"] if kw.lower() in text]
-    score += min(20, len(hits) * 4)
-    if hits:
-        reasons.append("Keywords: " + ", ".join(hits[:6]))
+    if job.get("description"):
+        hits = [kw for kw in role["keywords"] if kw.lower() in text]
+        score += min(20, len(hits) * 4)
+        if hits:
+            reasons.append("Keywords: " + ", ".join(hits[:6]))
+    else:
+        score += 10  # alert emails carry no description; don't punish that
+        reasons.append("Scored on title only: check the advert")
 
     if ENTRY.search(text):
         score += 10
@@ -218,10 +302,12 @@ def score_job(job, roles, cfg):
 
     sal = job.get("salary_max") or job.get("salary_min")
     if sal and sal < cfg["salary_floor"]:
-        score -= 30
+        score -= 60  # hard rule: below the floor is discarded
         reasons.append(f"Salary £{int(sal):,} below your £{cfg['salary_floor']:,} floor")
     elif sal:
         score += 5
+    else:
+        reasons.append("Salary not stated: check it's at least £{:,}".format(cfg["salary_floor"]))
 
     loc = (job.get("location") or "").lower() + " " + text[:600]
     if any(w in loc for w in ("london", "remote", "essex", "hybrid", "thurrock")):
@@ -311,6 +397,7 @@ if __name__ == "__main__":
     sub = ap.add_subparsers(dest="cmd", required=True)
     for c in ("fetch", "score", "tailor", "run"):
         sub.add_parser(c)
+    sub.add_parser("import", help="read alert items as JSON from stdin, then score + tailor")
     a = sub.add_parser("add")
     a.add_argument("url")
     a.add_argument("--title", required=True)
@@ -319,7 +406,10 @@ if __name__ == "__main__":
     a.add_argument("--source", default="Manual")
     a.add_argument("--location", default="")
     args = ap.parse_args()
-    if args.cmd == "add":
+    if args.cmd == "import":
+        raw = sys.stdin.buffer.read().decode("utf-8-sig")
+        print(import_alerts(json.loads(raw))); print(score()); print(tailor())
+    elif args.cmd == "add":
         print({"added": add_link(args.url, args.title, args.company, args.description, args.source, args.location)})
     elif args.cmd == "run":
         print(fetch()); print(score()); print(tailor())

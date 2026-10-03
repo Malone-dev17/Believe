@@ -436,7 +436,7 @@ main{min-width:0}
     <div class="ph"><h2>Job Hunter</h2><span class="mu" id="srcStatus" style="font-size:11px"></span></div>
     <div class="stats" id="jobStats"></div>
     <div class="bar" style="margin-top:12px">
-      <button class="btn" id="runBtn"><svg class="bi" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>Find &amp; prepare new roles</button>
+      <button class="btn" id="runBtn"><svg class="bi" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>Re-score &amp; prepare</button>
       <button class="btn" id="addBtn"><svg class="bi" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a job link</button>
       <span class="mu" style="font-size:11px">LinkedIn, Indeed, Totaljobs, WttJ and Handshake roles come in via alert emails or links you add, never by automating those sites.</span>
     </div>
@@ -496,13 +496,14 @@ const SKILLS=[
   {name:"cold-email",purpose:"Short outreach and follow-ups to recruiters",src:"coreyhaines31/marketingskills",status:"Installed"},
   {name:"context-engineering",purpose:"/generate-prp and /execute-prp build commands",src:"coleam00/context-engineering-intro",status:"Installed"},
   {name:"ui-ux-pro-max",purpose:"Design system and UX rules for the dashboard",src:"nextlevelbuilder/ui-ux-pro-max-skill",status:"Installed"},
-  {name:"browser-use",purpose:"Browser automation (decide at Module 1)",src:"browser-use/browser-use",status:"Pending"},
+  {name:"import-job-alerts",purpose:"Pulls jobs from your alert emails into the queue (built for M.A.R.C)",src:"dolarewaju/Believe",status:"Installed"},
+  {name:"browser-use",purpose:"Not needed: Claude in Chrome covers employer forms",src:"browser-use/browser-use",status:"Skipped"},
   {name:"supermemory",purpose:"Cloud memory service (skipped for now)",src:"supermemoryai/supermemory",status:"Skipped"}
 ];
 const tagFor=s=>s==="Installed"?"t-live":s==="Pending"?"t-warn":"t-off";
 const skillHTML=s=>`<div class="skill"><b>${s.name}</b><span class="tag ${tagFor(s.status)}">${s.status}</span><small>${s.purpose}</small><a href="https://github.com/${s.src}" target="_blank" rel="noopener">github.com/${s.src}</a></div>`;
 const installed=SKILLS.filter(s=>s.status==="Installed");
-document.getElementById('skillsMini').innerHTML=installed.slice(0,4).map(s=>`<div class="row" style="padding:6px 9px"><div class="grow"><b>${s.name}</b><small class="mu">${s.src}</small></div><span class="tag t-live">On</span></div>`).join('')+`<small class="mu" style="text-align:right">+${installed.length-4} more · 2 pending</small>`;
+document.getElementById('skillsMini').innerHTML=installed.slice(0,4).map(s=>`<div class="row" style="padding:6px 9px"><div class="grow"><b>${s.name}</b><small class="mu">${s.src}</small></div><span class="tag t-live">On</span></div>`).join('')+`<small class="mu" style="text-align:right">+${installed.length-4} more · ${SKILLS.length-installed.length} skipped</small>`;
 document.getElementById('skillsFull').innerHTML=SKILLS.map(skillHTML).join('');
 document.getElementById('skillCount').textContent=SKILLS.filter(s=>s.status==="Installed").length;
 
@@ -560,7 +561,7 @@ const money=j=>{const a=j.salary_min,b=j.salary_max;if(!a&&!b)return'Salary not 
 async function loadJobs(){
   try{const s=await api('/api/status');LOCAL=true;
     JOBS=await api('/api/jobs');const st=s.stats;
-    document.getElementById('srcStatus').textContent=`Reed API: ${s.reed?'connected':'no key yet'} · Adzuna API: ${s.adzuna?'connected':'no key yet'}`;
+    document.getElementById('srcStatus').textContent='Sources: job alert emails (via Claude) + links you add';
     document.getElementById('jobStats').innerHTML=[['Found',st.found],['Discarded',st.discarded],['In queue',st.queued],['Ready to submit',st.approved],['Applied today',st.applied_today],['Applied this week',st.applied_week],['Response rate',st.response_rate+'%']].map(([l,v])=>`<div class="stat"><small>${l}</small><b>${v}</b></div>`).join('');
     document.querySelector('.nav[data-view="jobs"] .n').textContent=st.queued;
     renderJobs();
@@ -575,7 +576,7 @@ function renderJobs(){
   document.getElementById('aN').textContent=`(${JOBS.filter(j=>j.status==='approved').length})`;
   document.getElementById('bulk').style.display=TAB==='queued'?'flex':'none';
   document.getElementById('selAll').checked=false;
-  if(!list.length){document.getElementById('jobList').innerHTML=`<div class="empty">${TAB==='queued'?'Nothing waiting for approval. Click <b>Find &amp; prepare new roles</b> or add a job link.':'Nothing approved yet.'}</div>`;return;}
+  if(!list.length){document.getElementById('jobList').innerHTML=`<div class="empty">${TAB==='queued'?'Nothing waiting for approval. Ask Claude to <b>import my job alerts</b>, or add a job link.':'Nothing approved yet.'}</div>`;return;}
   document.getElementById('jobList').innerHTML=list.map(j=>`
   <article class="job" data-id="${j.id}">
     <header>${TAB==='queued'?`<input type="checkbox" class="pick" aria-label="Select">`:'<span></span>'}
@@ -611,7 +612,7 @@ document.getElementById('runBtn').addEventListener('click',async e=>{
   const b=e.currentTarget;b.disabled=true;b.lastChild.textContent='Working… (can take a minute)';
   try{const r=await api('/api/run',{step:'run'});const f=r.fetch;toast(`Fetched ${f.fetched}, ${f.added} new · kept ${r.score.kept}, discarded ${r.score.discarded} · ${r.tailor.queued} queued`+(f.notes.length?' · '+f.notes.join('; '):''));}
   catch(err){toast('Problem: '+err.message);}
-  b.disabled=false;b.lastChild.textContent='Find & prepare new roles';loadJobs();});
+  b.disabled=false;b.lastChild.textContent='Re-score & prepare';loadJobs();});
 document.getElementById('addBtn').addEventListener('click',()=>document.getElementById('addForm').classList.toggle('on'));
 document.getElementById('aSave').addEventListener('click',async()=>{
   if(!LOCAL)return toast('Open M.A.R.C on your laptop to add jobs.');

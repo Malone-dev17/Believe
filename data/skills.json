@@ -57,13 +57,22 @@
       "modules": ["Dashboard design"],
       "notes": "Test files left out. Scripts checked: local-only, no network access. Needs Python 3.12 (installed)."
     }
+    ,{
+      "name": "import-job-alerts",
+      "purpose": "Pulls jobs from alert emails (via the Gmail connector) into the M.A.R.C queue, with clean links",
+      "source": "Built for this repo",
+      "license": "n/a",
+      "installed": "2026-10-03",
+      "location": ".claude/skills/import-job-alerts",
+      "modules": ["Job applications"]
+    }
   ],
   "pending": [
     {
       "name": "browser-use",
       "source": "https://github.com/browser-use/browser-use",
-      "when": "Module 1 decision",
-      "needs": "Python 3.11+, uv, Chromium; telemetry must be disabled (ANONYMIZED_TELEMETRY=false)"
+      "when": "Skipped 2026-10-03",
+      "needs": "Not needed: Claude in Chrome covers employer forms; job boards are not automated"
     },
     {
       "name": "supermemory",
