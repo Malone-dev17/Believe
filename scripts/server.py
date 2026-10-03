@@ -39,7 +39,17 @@ def stats():
     applied = [j for j in store if j.get("applied")]
     responded = [j for j in applied if j["status"] in ("viewed", "interview", "rejected", "offer")]
     by = lambda s: sum(1 for j in store if j["status"] == s)
+    days = [(today - timedelta(days=i)).isoformat() for i in range(13, -1, -1)]
+    daily = [{"date": d, "count": sum(1 for j in applied if j["applied"] == d)} for d in days]
+    weekly = []
+    for w in range(7, -1, -1):
+        start = week_start - timedelta(weeks=w)
+        end = start + timedelta(days=7)
+        weekly.append({"week": start.isoformat(),
+                       "count": sum(1 for j in applied if start.isoformat() <= j["applied"] < end.isoformat())})
     return {
+        "daily": daily, "weekly": weekly,
+        "viewed": by("viewed"), "rejected": by("rejected"),
         "found": len(store), "discarded": by("discarded"), "queued": by("queued"), "approved": by("approved"),
         "applied_today": sum(1 for j in applied if j["applied"] == today.isoformat()),
         "applied_week": sum(1 for j in applied if j["applied"] >= week_start.isoformat()),
@@ -143,7 +153,7 @@ def update(data):
             if status == "applied" and not j.get("applied"):
                 j["applied"] = today
                 j["follow_up"] = (date.today() + timedelta(days=7)).isoformat()
-        for field in ("notes", "follow_up"):
+        for field in ("notes", "follow_up", "company", "title"):
             if field in data:
                 j[field] = data[field]
     jobs.save_json(jobs.STORE, store)

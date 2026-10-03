@@ -211,6 +211,35 @@ main{min-width:0}
 .empty{color:var(--muted);text-align:center;padding:30px 10px}
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--panel-solid);border:1px solid var(--cyan);border-radius:8px;padding:10px 18px;box-shadow:var(--glow);display:none;z-index:9}
 
+/* tracker */
+#tracker{grid-template-columns:minmax(0,1fr);gap:12px;align-content:start}
+.trk-top{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}
+.chart{position:relative}
+.chart svg{width:100%;height:170px;display:block}
+.chart .bar-r{fill:var(--cyan);opacity:.85}
+.chart .hit:hover+.bar-r,.chart .bar-r.on{opacity:1;filter:drop-shadow(0 0 6px var(--cyan))}
+.chart text{fill:var(--muted);font:10px var(--ui)}
+.tip{position:absolute;pointer-events:none;background:var(--panel-solid);border:1px solid var(--line-strong);border-radius:6px;padding:5px 9px;font-size:11px;display:none;white-space:nowrap}
+.weeks{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin-top:10px}
+.weeks div{text-align:center;border:1px solid var(--line);border-radius:6px;padding:5px 2px;background:rgba(3,11,23,.45)}
+.weeks small{display:block;color:var(--muted);font-size:9.5px}.weeks b{font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip-f{border:1px solid var(--line);border-radius:14px;padding:4px 11px;font-size:11.5px;color:var(--muted)}
+.chip-f.on{border-color:var(--cyan);color:#fff;background:rgba(34,211,238,.12)}
+.tbl-wrap{overflow-x:auto;margin-top:10px}
+table.trk{width:100%;border-collapse:collapse;min-width:900px;font-size:12px}
+.trk th{text-align:left;font:600 9.5px var(--display);letter-spacing:.1em;color:var(--cyan-soft);padding:8px 6px;border-bottom:1px solid var(--line-strong);white-space:nowrap}
+.trk td{padding:6px;border-bottom:1px solid var(--line);vertical-align:middle}
+.trk tr:hover td{background:rgba(34,211,238,.04)}
+.trk input,.trk select{background:rgba(3,11,23,.7);border:1px solid transparent;border-radius:5px;color:var(--text);font:12px var(--ui);padding:4px 6px;width:100%}
+.trk input:hover,.trk select:hover,.trk input:focus,.trk select:focus{border-color:var(--line-strong)}
+.trk input[type=date]{color-scheme:dark;width:128px}
+.st{font-size:10px;font-weight:600;border-radius:10px;padding:2px 8px;border:1px solid currentColor;white-space:nowrap}
+.st-queued,.st-approved{color:var(--cyan-soft)}.st-applied{color:#93c5fd}.st-viewed{color:var(--violet)}
+.st-interview{color:var(--amber)}.st-offer{color:var(--green)}.st-rejected{color:var(--red)}.st-dismissed{color:var(--dim)}
+.due{color:var(--amber);font-weight:600}
+@media (max-width:1000px){.trk-top{grid-template-columns:minmax(0,1fr)}}
+
 /* placeholders */
 .ph-view{place-items:center;min-height:500px;text-align:center}
 .ph-view p{color:var(--muted);max-width:420px;margin-top:8px}
@@ -296,7 +325,7 @@ main{min-width:0}
       <div class="row"><span class="ico gr"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg></span><div class="grow"><b>Applications</b><small class="gr">0 today · 0 this week</small></div></div>
       <div class="row"><span class="ico vi"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/></svg></span><div class="grow"><b>Investments</b><small class="vi">Stocks &amp; Shares ISA</small></div></div>
       <div class="row"><span class="ico am"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span><div class="grow"><b>Watchlist</b><small class="am">6 watching · 0 added here</small></div></div>
-      <div class="row"><span class="ico cy"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg></span><div class="grow"><b>Skills</b><small class="cy">6 installed · 2 pending</small></div></div>
+      <div class="row"><span class="ico cy"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg></span><div class="grow"><b>Skills</b><small class="cy" id="skillsRow">Installed skills</small></div></div>
       <div class="row"><span class="ico gr"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></span><div class="grow"><b>System</b><small class="gr">Optimal</small></div></div>
     </div>
   </div>
@@ -467,6 +496,34 @@ main{min-width:0}
 </section>
 <div class="toast" id="toast"></div>
 
+<!-- ---------- TRACKER (Module 1, step 5) ---------- -->
+<section class="view" id="tracker">
+  <div class="panel">
+    <div class="ph"><h2>Application Tracker</h2><span class="mu" style="font-size:11px">Daily target: 30–50 · Response rate = viewed, interview, rejected or offer ÷ applied</span></div>
+    <div class="stats" id="trkStats"></div>
+  </div>
+  <div class="trk-top">
+    <div class="panel chart" id="trkChart">
+      <div class="ph"><h2>Applications per day · last 14 days</h2></div>
+      <svg id="dayChart" role="img" aria-label="Applications per day, last 14 days"></svg>
+      <div class="tip" id="dayTip"></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2>Weekly totals · last 8 weeks</h2></div>
+      <div class="weeks" id="weekTotals"></div>
+      <div class="ph" style="margin:14px 0 8px"><h2>Follow-ups due</h2></div>
+      <div class="list" id="dueList"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph" style="flex-wrap:wrap">
+      <div class="chips" id="trkFilters"></div>
+      <input id="trkSearch" placeholder="Search company or role…" style="background:rgba(3,11,23,.7);border:1px solid var(--line);border-radius:6px;color:var(--text);padding:6px 10px;font:12px var(--ui);width:220px">
+    </div>
+    <div class="tbl-wrap"><table class="trk"><thead><tr><th>Company</th><th>Role</th><th>Date</th><th>CV version</th><th>Status</th><th>Follow-up</th><th>Notes</th><th></th></tr></thead><tbody id="trkBody"></tbody></table></div>
+  </div>
+</section>
+
 <!-- ---------- SKILLS ---------- -->
 <section class="view" id="skills" style="grid-template-columns:minmax(0,1fr);gap:12px">
   <div class="panel">
@@ -513,6 +570,7 @@ const installed=SKILLS.filter(s=>s.status==="Installed");
 document.getElementById('skillsMini').innerHTML=installed.slice(0,4).map(s=>`<div class="row" style="padding:6px 9px"><div class="grow"><b>${s.name}</b><small class="mu">${s.src}</small></div><span class="tag t-live">On</span></div>`).join('')+`<small class="mu" style="text-align:right">+${installed.length-4} more · ${SKILLS.length-installed.length} skipped</small>`;
 document.getElementById('skillsFull').innerHTML=SKILLS.map(skillHTML).join('');
 document.getElementById('skillCount').textContent=SKILLS.filter(s=>s.status==="Installed").length;
+document.getElementById('skillsRow').textContent=`${SKILLS.filter(s=>s.status==="Installed").length} installed · ${SKILLS.filter(s=>s.status!=="Installed").length} skipped`;
 
 // ---- agents ----
 const AGENTS=[
@@ -554,7 +612,7 @@ function net(){const c=navigator.connection;const el=document.getElementById('ne
 net();addEventListener('online',net);addEventListener('offline',net);if(navigator.connection)navigator.connection.addEventListener('change',net);
 
 // ---- view switching ----
-const PH={tracker:["Tracker","Module 1: every application with status, follow-ups, and daily/weekly totals."],invest:["Investment Research","Module 2: research cards with YES / NO for Trading 212 ISA instruments."],watch:["Watchlist","Module 2: everything you said YES to, with date and reason."],agents:["Agents","Each agent's status and recent runs."],soon:["Coming later","Placeholder: built after Modules 1 and 2."]};
+const PH={invest:["Investment Research","Module 2: research cards with YES / NO for Trading 212 ISA instruments."],watch:["Watchlist","Module 2: everything you said YES to, with date and reason."],agents:["Agents","Each agent's status and recent runs."],soon:["Coming later","Placeholder: built after Modules 1 and 2."]};
 function show(v){document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));
   const real=document.getElementById(v);
   if(real&&v!=='ph'){real.classList.add('on');}else{const [t,x]=PH[v]||PH.soon;document.getElementById('phTitle').textContent=t;document.getElementById('phText').textContent=x;document.getElementById('ph').classList.add('on');}}
@@ -573,7 +631,7 @@ async function loadJobs(){
     document.getElementById('srcStatus').textContent='Sources: job alert emails (via Claude) + links you add';
     document.getElementById('jobStats').innerHTML=[['Found',st.found],['Discarded',st.discarded],['In queue',st.queued],['Ready to submit',st.approved],['Applied today',st.applied_today],['Applied this week',st.applied_week],['Response rate',st.response_rate+'%']].map(([l,v])=>`<div class="stat"><small>${l}</small><b>${v}</b></div>`).join('');
     document.querySelector('.nav[data-view="jobs"] .n').textContent=st.queued;
-    renderJobs();
+    renderJobs();liveDash();
   }catch(e){LOCAL=false;
     document.getElementById('jobStats').innerHTML='';
     document.getElementById('jobList').innerHTML=`<div class="empty">Your job data stays on your laptop.<br>Open M.A.R.C with <b>Open MARC.bat</b> to see your queue.</div>`;
@@ -633,7 +691,81 @@ document.getElementById('aSave').addEventListener('click',async()=>{
     ['aUrl','aTitle','aCompany','aSource','aDesc'].forEach(i=>document.getElementById(i).value='');}
   catch(err){toast('Problem: '+err.message);}
   loadJobs();});
-loadJobs();
+const READY=loadJobs();
+
+// ================= TRACKER =================
+const STAT_OPTS=['queued','approved','applied','viewed','interview','rejected','offer','dismissed'];
+const FILTERS=[['all','All'],['pending','Queued / approved'],['applied','Applied'],['viewed','Viewed'],['interview','Interview'],['rejected','Rejected'],['offer','Offer'],['due','Follow-up due']];
+let TF='all';const todayISO=()=>new Date().toLocaleDateString('en-CA');
+const fmtD=d=>d?new Date(d+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
+const isDue=j=>j.follow_up&&j.follow_up<=todayISO()&&['applied','viewed'].includes(j.status);
+function followMsg(j){return `Hi,\n\nI applied for the ${j.title} role${j.company&&!/^Not shown/.test(j.company)?' at '+j.company:''} on ${fmtD(j.applied)} and wanted to check in. I'm still very interested: I manage 5 client relationships in a sales-facing role and can start immediately.\n\nHappy to share anything else that would help.\n\nKind regards,\nDamilola Olarewaju`;}
+async function loadTracker(){
+  await READY;
+  if(!LOCAL){document.getElementById('trkBody').innerHTML='<tr><td colspan="8" class="empty">Open M.A.R.C on your laptop to see your tracker.</td></tr>';return;}
+  const st=(await api('/api/status')).stats;const all=await api('/api/jobs');
+  document.getElementById('trkStats').innerHTML=[['Applied today',st.applied_today],['This week',st.applied_week],['Total applied',st.applied_total],['Response rate',st.response_rate+'%'],['Interviews',st.interviews],['Offers',st.offers],['Follow-ups due',st.follow_ups_due]].map(([l,v])=>`<div class="stat"><small>${l}</small><b>${v}</b></div>`).join('');
+  drawDays(st.daily);
+  document.getElementById('weekTotals').innerHTML=st.weekly.map(w=>`<div><small>w/c ${fmtD(w.week)}</small><b>${w.count}</b></div>`).join('');
+  const due=all.filter(isDue);
+  document.getElementById('dueList').innerHTML=due.length?due.map(j=>`<div class="row" data-id="${j.id}"><div class="grow"><b>${esc(j.title)}</b><small class="mu">${esc(j.company)} · applied ${fmtD(j.applied)}</small></div><button class="btn sm" data-fu>Copy follow-up</button></div>`).join(''):'<small class="mu">Nothing due. Nice.</small>';
+  document.getElementById('trkFilters').innerHTML=FILTERS.map(([k,l])=>`<button class="chip-f ${k===TF?'on':''}" data-f="${k}">${l}</button>`).join('');
+  const q=document.getElementById('trkSearch').value.toLowerCase();
+  const rows=all.filter(j=>j.status!=='dismissed'||TF==='all').filter(j=>TF==='all'||(TF==='pending'?['queued','approved'].includes(j.status):TF==='due'?isDue(j):j.status===TF))
+    .filter(j=>!q||(j.company+' '+j.title).toLowerCase().includes(q))
+    .sort((a,b)=>(b.applied||b.queued||b.found||'').localeCompare(a.applied||a.queued||a.found||''));
+  window._trk=all;
+  document.getElementById('trkBody').innerHTML=rows.length?rows.map(j=>`<tr data-id="${j.id}">
+    <td><input data-k="company" value="${esc(j.company)}"></td>
+    <td>${esc(j.title)}<br><small class="mu">${esc(j.source)}${j.score!=null?' · score '+j.score:''}</small></td>
+    <td style="white-space:nowrap">${j.applied?fmtD(j.applied):'<span class="mu">'+(j.status==='approved'?'Approved ':'Queued ')+fmtD((j.approved||j.queued||j.found||'').slice(0,10))+'</span>'}</td>
+    <td><small>${esc(j.cv_role||'')}</small>${j.cv_file?`<br><a class="link" href="/${esc(j.cv_file)}" download>download</a>`:''}</td>
+    <td><select data-k="status">${STAT_OPTS.map(s=>`<option ${s===j.status?'selected':''}>${s}</option>`).join('')}</select><br><span class="st st-${j.status}">${j.status}</span></td>
+    <td><input type="date" data-k="follow_up" value="${esc(j.follow_up||'')}" class="${isDue(j)?'due':''}"></td>
+    <td><input data-k="notes" value="${esc(j.notes||'')}" placeholder="Add a note"></td>
+    <td style="white-space:nowrap">${j.url?`<a class="link" href="${esc(j.url)}" target="_blank" rel="noopener">advert ↗</a>`:''}${j.applied?`<br><button class="link" data-fu>follow-up</button>`:''}</td></tr>`).join(''):'<tr><td colspan="8" class="empty">No applications match.</td></tr>';
+}
+function drawDays(days){
+  const svg=document.getElementById('dayChart'),W=svg.clientWidth||600,H=170,pl=26,pb=22,pt=10;
+  const max=Math.max(5,...days.map(d=>d.count)),step=Math.ceil(max/4);const top=step*4;
+  const bw=(W-pl)/days.length,y=v=>H-pb-(v/top)*(H-pb-pt);
+  let g='';for(let v=0;v<=top;v+=step)g+=`<line x1="${pl}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(56,189,248,.12)"/><text x="${pl-6}" y="${y(v)+3}" text-anchor="end">${v}</text>`;
+  days.forEach((d,i)=>{const x=pl+i*bw+2,w=Math.max(2,bw-4),h=H-pb-y(d.count),yy=y(d.count);
+    const r=Math.min(4,w/2,h);
+    const path=h>0?`M${x},${H-pb}V${yy+r}Q${x},${yy} ${x+r},${yy}H${x+w-r}Q${x+w},${yy} ${x+w},${yy+r}V${H-pb}Z`:'';
+    g+=`<rect class="hit" x="${pl+i*bw}" y="${pt}" width="${bw}" height="${H-pb-pt}" fill="transparent" data-i="${i}"/>${path?`<path class="bar-r" d="${path}"/>`:''}`;
+    if(i%2===days.length%2||i===days.length-1)g+=`<text x="${x+w/2}" y="${H-6}" text-anchor="middle">${new Date(d.date+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</text>`;});
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.innerHTML=g;
+  const tip=document.getElementById('dayTip');
+  svg.querySelectorAll('.hit').forEach(h=>{h.addEventListener('mousemove',e=>{const d=days[h.dataset.i];tip.style.display='block';tip.textContent=`${new Date(d.date+'T12:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})}: ${d.count} applied`;const b=svg.getBoundingClientRect(),p=svg.parentElement.getBoundingClientRect();tip.style.left=(e.clientX-p.left+10)+'px';tip.style.top=(e.clientY-p.top-30)+'px';});h.addEventListener('mouseleave',()=>tip.style.display='none');});
+}
+document.getElementById('tracker').addEventListener('change',async e=>{
+  const k=e.target.dataset.k;if(!k)return;const id=e.target.closest('tr').dataset.id;
+  const body={ids:[id]};body[k]=e.target.value;await api('/api/jobs/update',body);
+  toast(k==='status'?`Status set to ${e.target.value}.`:'Saved.');loadTracker();loadJobs();});
+document.getElementById('tracker').addEventListener('click',async e=>{
+  const f=e.target.closest('[data-f]');if(f){TF=f.dataset.f;return loadTracker();}
+  if(e.target.closest('[data-fu]')){const id=e.target.closest('[data-id]').dataset.id;const j=window._trk.find(x=>x.id===id);
+    await navigator.clipboard.writeText(followMsg(j));toast('Follow-up message copied. Paste it into an email or LinkedIn message.');}});
+document.getElementById('trkSearch').addEventListener('input',()=>loadTracker());
+document.querySelector('.nav[data-view="tracker"]').addEventListener('click',()=>setTimeout(loadTracker,0));
+
+// ---- dashboard: real numbers when running locally ----
+async function liveDash(){
+  if(!LOCAL)return;const st=(await api('/api/status')).stats;
+  const C=2*Math.PI*36,ring=(i,p,v)=>{const el=document.querySelectorAll('#rings .ring')[i];el.querySelectorAll('circle')[1].setAttribute('stroke-dasharray',`${(C*Math.min(p,100)/100).toFixed(1)} ${C.toFixed(1)}`);el.querySelector('b').textContent=v;};
+  ring(0,st.response_rate,st.response_rate+'%');ring(1,st.applied_today/30*100,String(st.applied_today));
+  document.querySelectorAll('#rings .ring p')[1].textContent='Applied today (target 30)';
+  document.querySelectorAll('#rings .ring p')[2].textContent='ISA goal (sample until Module 2)';
+  document.querySelector('#rings').closest('.panel').querySelector('.sample').textContent='LIVE';
+  const rows=document.querySelectorAll('#dash .c3 .list .row small');
+  rows[0].textContent=`${st.queued} awaiting approval`;rows[1].textContent=`${st.applied_today} today · ${st.applied_week} this week`;
+  const feed=[[`${st.queued} roles await your approval`,'Job Hunter','t-warn','Review'],[`${st.approved} approved, ready to submit`,'Job Hunter','t-info','Submit'],[`${st.follow_ups_due} follow-ups due`,'Tracker','t-info','Due'],[`${st.applied_week} applications this week`,'Tracker','t-tip','Week'],['Next alert import: weekdays 8am','Scheduler','t-live','Auto']];
+  const intel=document.querySelector('#dash .c3:nth-of-type(3) .list');
+  if(intel){intel.innerHTML=feed.map(([t,s,c,tag])=>`<div class="row"><div class="grow"><b>${t}</b><small class="mu">${s}</small></div><span class="tag ${c}">${tag}</span></div>`).join('');
+    intel.closest('.panel').querySelector('.tag').className='tag t-live';intel.closest('.panel').querySelector('.tag').textContent='● Live';
+    const s=intel.closest('.panel').querySelector('.sample');if(s)s.remove();}
+}
 
 if(location.hash){const b=document.querySelector(`.nav[data-view="${location.hash.slice(1)}"]`);if(b)b.click();}
 document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>document.querySelector(`.nav[data-view="${b.dataset.goto}"]`).click()));
