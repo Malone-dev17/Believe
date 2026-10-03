@@ -12,6 +12,7 @@ from urllib.parse import urlparse, unquote
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import jobs  # noqa: E402
+import invest  # noqa: E402
 
 ROOT = jobs.ROOT
 PORT = 8765
@@ -89,6 +90,11 @@ class Handler(SimpleHTTPRequestHandler):
                                "stats": stats()})
         if path == "/api/jobs":
             return self._json(jobs_view())
+        if path == "/api/invest":
+            prof = jobs.load_json(ROOT / "private" / "profile.json", {}).get("investing", {})
+            cache = jobs.load_json(invest.INSTRUMENTS, {})
+            return self._json({"cards": jobs.load_json(invest.CARDS, []), "profile": prof,
+                               "t212_list": cache.get("fetched"), "t212_count": len(cache.get("instruments", []))})
         if path.startswith(BLOCKED) and not path.startswith(DOWNLOADABLE):
             return self.send_error(403)
         if path.startswith(DOWNLOADABLE) and ".." in path:
@@ -105,6 +111,8 @@ class Handler(SimpleHTTPRequestHandler):
             data = self._body()
             if path == "/api/jobs/update":
                 return self._json(update(data))
+            if path == "/api/invest/decide":
+                return self._json(invest.decide(data["id"], data["decision"], data.get("reason", "")))
             if path == "/api/jobs/note":
                 j = find(data["id"])
                 (ROOT / j["note_file"]).write_text(data["text"], encoding="utf-8")

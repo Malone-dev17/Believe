@@ -1,84 +1,109 @@
-{
-  "updated": "2026-10-02",
-  "installed": [
-    {
-      "name": "stop-slop",
-      "purpose": "Strips AI-sounding phrasing from CVs, cover notes and briefs",
-      "source": "https://github.com/hardikpandya/stop-slop",
-      "license": "MIT",
-      "installed": "2026-10-02",
-      "location": ".claude/skills/stop-slop",
-      "modules": ["Job applications"]
-    },
-    {
-      "name": "copywriting",
-      "purpose": "Persuasive, clear copy for headlines, summaries and cover notes",
-      "source": "https://github.com/coreyhaines31/marketingskills (skills/copywriting)",
-      "license": "MIT",
-      "installed": "2026-10-02",
-      "location": ".claude/skills/copywriting",
-      "modules": ["Job applications"]
-    },
-    {
-      "name": "copy-editing",
-      "purpose": "Line-by-line editing pass and plain-English swaps",
-      "source": "https://github.com/coreyhaines31/marketingskills (skills/copy-editing)",
-      "license": "MIT",
-      "installed": "2026-10-02",
-      "location": ".claude/skills/copy-editing",
-      "modules": ["Job applications"]
-    },
-    {
-      "name": "cold-email",
-      "purpose": "Short outreach and follow-up messages to recruiters and hiring managers",
-      "source": "https://github.com/coreyhaines31/marketingskills (skills/cold-email)",
-      "license": "MIT",
-      "installed": "2026-10-02",
-      "location": ".claude/skills/cold-email",
-      "modules": ["Job applications"]
-    },
-    {
-      "name": "context-engineering (/generate-prp, /execute-prp)",
-      "purpose": "Plan-then-build commands used to build each module in checked stages",
-      "source": "https://github.com/coleam00/context-engineering-intro",
-      "license": "MIT",
-      "installed": "2026-10-02",
-      "location": ".claude/commands, PRPs/templates, docs/context-engineering",
-      "modules": ["Build process"],
-      "notes": "Its settings.local.json (pre-approved commands) was deliberately NOT installed."
-    }
-    ,{
-      "name": "ui-ux-pro-max",
-      "purpose": "Design system and UX checklist for the dashboard",
-      "source": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-      "license": "MIT",
-      "installed": "2026-10-02",
-      "location": ".claude/skills/ui-ux-pro-max",
-      "modules": ["Dashboard design"],
-      "notes": "Test files left out. Scripts checked: local-only, no network access. Needs Python 3.12 (installed)."
-    }
-    ,{
-      "name": "import-job-alerts",
-      "purpose": "Pulls jobs from alert emails (via the Gmail connector) into the M.A.R.C queue, with clean links",
-      "source": "Built for this repo",
-      "license": "n/a",
-      "installed": "2026-10-03",
-      "location": ".claude/skills/import-job-alerts",
-      "modules": ["Job applications"]
-    }
-  ],
-  "pending": [
-    {
-      "name": "browser-use",
-      "source": "https://github.com/browser-use/browser-use",
-      "when": "Skipped 2026-10-03",
-      "needs": "Not needed: Claude in Chrome covers employer forms; job boards are not automated"
-    },
-    {
-      "name": "supermemory",
-      "source": "https://github.com/supermemoryai/supermemory",
-      "when": "Skipped for now",
-      "needs": "Supermemory account + API key; data stored on their cloud unless self-hosted"
-    }
-  ]
+﻿{
+    "updated":  "2026-10-02",
+    "installed":  [
+                      {
+                          "name":  "stop-slop",
+                          "purpose":  "Strips AI-sounding phrasing from CVs, cover notes and briefs",
+                          "source":  "https://github.com/hardikpandya/stop-slop",
+                          "license":  "MIT",
+                          "installed":  "2026-10-02",
+                          "location":  ".claude/skills/stop-slop",
+                          "modules":  [
+                                          "Job applications"
+                                      ]
+                      },
+                      {
+                          "name":  "copywriting",
+                          "purpose":  "Persuasive, clear copy for headlines, summaries and cover notes",
+                          "source":  "https://github.com/coreyhaines31/marketingskills (skills/copywriting)",
+                          "license":  "MIT",
+                          "installed":  "2026-10-02",
+                          "location":  ".claude/skills/copywriting",
+                          "modules":  [
+                                          "Job applications"
+                                      ]
+                      },
+                      {
+                          "name":  "copy-editing",
+                          "purpose":  "Line-by-line editing pass and plain-English swaps",
+                          "source":  "https://github.com/coreyhaines31/marketingskills (skills/copy-editing)",
+                          "license":  "MIT",
+                          "installed":  "2026-10-02",
+                          "location":  ".claude/skills/copy-editing",
+                          "modules":  [
+                                          "Job applications"
+                                      ]
+                      },
+                      {
+                          "name":  "cold-email",
+                          "purpose":  "Short outreach and follow-up messages to recruiters and hiring managers",
+                          "source":  "https://github.com/coreyhaines31/marketingskills (skills/cold-email)",
+                          "license":  "MIT",
+                          "installed":  "2026-10-02",
+                          "location":  ".claude/skills/cold-email",
+                          "modules":  [
+                                          "Job applications"
+                                      ]
+                      },
+                      {
+                          "name":  "context-engineering (/generate-prp, /execute-prp)",
+                          "purpose":  "Plan-then-build commands used to build each module in checked stages",
+                          "source":  "https://github.com/coleam00/context-engineering-intro",
+                          "license":  "MIT",
+                          "installed":  "2026-10-02",
+                          "location":  ".claude/commands, PRPs/templates, docs/context-engineering",
+                          "modules":  [
+                                          "Build process"
+                                      ],
+                          "notes":  "Its settings.local.json (pre-approved commands) was deliberately NOT installed."
+                      },
+                      {
+                          "name":  "ui-ux-pro-max",
+                          "purpose":  "Design system and UX checklist for the dashboard",
+                          "source":  "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+                          "license":  "MIT",
+                          "installed":  "2026-10-02",
+                          "location":  ".claude/skills/ui-ux-pro-max",
+                          "modules":  [
+                                          "Dashboard design"
+                                      ],
+                          "notes":  "Test files left out. Scripts checked: local-only, no network access. Needs Python 3.12 (installed)."
+                      },
+                      {
+                          "name":  "import-job-alerts",
+                          "purpose":  "Pulls jobs from alert emails (via the Gmail connector) into the M.A.R.C queue, with clean links",
+                          "source":  "Built for this repo",
+                          "license":  "n/a",
+                          "installed":  "2026-10-03",
+                          "location":  ".claude/skills/import-job-alerts",
+                          "modules":  [
+                                          "Job applications"
+                                      ]
+                      },
+                      {
+                          "name":  "research-investments",
+                          "purpose":  "Sourced, balanced research cards for the Investments screen",
+                          "source":  "Built for this repo",
+                          "license":  "n/a",
+                          "installed":  "2026-10-03",
+                          "location":  ".claude/skills/research-investments",
+                          "modules":  [
+                                          "Investment research"
+                                      ]
+                      }
+                  ],
+    "pending":  [
+                    {
+                        "name":  "browser-use",
+                        "source":  "https://github.com/browser-use/browser-use",
+                        "when":  "Skipped 2026-10-03",
+                        "needs":  "Not needed: Claude in Chrome covers employer forms; job boards are not automated"
+                    },
+                    {
+                        "name":  "supermemory",
+                        "source":  "https://github.com/supermemoryai/supermemory",
+                        "when":  "Skipped for now",
+                        "needs":  "Supermemory account + API key; data stored on their cloud unless self-hosted"
+                    }
+                ]
 }

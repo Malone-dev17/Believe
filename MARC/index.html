@@ -240,6 +240,26 @@ table.trk{width:100%;border-collapse:collapse;min-width:900px;font-size:12px}
 .due{color:var(--amber);font-weight:600}
 @media (max-width:1000px){.trk-top{grid-template-columns:minmax(0,1fr)}}
 
+/* investments */
+#invest,#watch{grid-template-columns:minmax(0,1fr);gap:12px;align-content:start}
+.disc{border-left:3px solid var(--amber);padding:8px 12px;background:rgba(251,191,36,.06);border-radius:0 8px 8px 0;font-size:12px;color:#e8d9b0}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:12px}
+.icard{border:1px solid var(--line);border-radius:10px;background:rgba(3,11,23,.55);padding:14px;display:flex;flex-direction:column;gap:10px}
+.icard h3{font:700 15px var(--ui)}.icard .sub{font-size:11px;color:var(--muted)}
+.icard h4{font:600 9.5px var(--display);letter-spacing:.12em;color:var(--cyan-soft);margin-bottom:4px;text-transform:uppercase}
+.icard ul{padding-left:16px;font-size:12px;color:#c9d9ea}.icard li{margin:2px 0}
+.icard p{font-size:12.5px;color:#c9d9ea}
+.nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:6px}
+.nums div{border:1px solid var(--line);border-radius:6px;padding:6px 8px}.nums small{display:block;color:var(--muted);font-size:10px}.nums b{font-size:13px;font-variant-numeric:tabular-nums}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.srcs{font-size:11px;color:var(--muted)}.srcs a{color:var(--cyan-soft)}
+.decide{display:flex;gap:8px;align-items:center;border-top:1px solid var(--line);padding-top:10px}
+.decide input{flex:1;background:rgba(3,11,23,.7);border:1px solid var(--line);border-radius:6px;color:var(--text);padding:7px 9px;font:12px var(--ui)}
+.btn.yes{border-color:var(--green);color:var(--green);font-weight:700}.btn.nob{border-color:rgba(248,113,113,.6);color:var(--red);font-weight:700}
+.avail{font-size:10px;font-weight:600;border-radius:10px;padding:2px 8px;border:1px solid currentColor;white-space:nowrap}
+.av-available{color:var(--green)}.av-unverified{color:var(--amber)}.av-not_found{color:var(--red)}
+@media (max-width:700px){.cards{grid-template-columns:minmax(0,1fr)}.two{grid-template-columns:1fr}}
+
 /* placeholders */
 .ph-view{place-items:center;min-height:500px;text-align:center}
 .ph-view p{color:var(--muted);max-width:420px;margin-top:8px}
@@ -496,6 +516,28 @@ table.trk{width:100%;border-collapse:collapse;min-width:900px;font-size:12px}
 </section>
 <div class="toast" id="toast"></div>
 
+<!-- ---------- INVESTMENTS (Module 2) ---------- -->
+<section class="view" id="invest">
+  <div class="panel">
+    <div class="ph"><h2>Investment Research · Trading 212 Stocks &amp; Shares ISA</h2><span class="mu" id="t212Status" style="font-size:11px"></span></div>
+    <div class="disc">Research and facts, not personal financial advice. Figures carry their source and date, and they go out of date. You make every decision, and M.A.R.C never places trades.</div>
+    <div class="chips" style="margin-top:12px" id="invFilters"></div>
+  </div>
+  <div class="cards" id="invCards"></div>
+</section>
+
+<!-- ---------- WATCHLIST (Module 2) ---------- -->
+<section class="view" id="watch">
+  <div class="panel">
+    <div class="ph"><h2>Your Watchlist</h2><span class="mu" style="font-size:11px">Everything you said YES to</span></div>
+    <div class="tbl-wrap"><table class="trk" style="min-width:760px"><thead><tr><th>Instrument</th><th>Type</th><th>Added</th><th>Your reason</th><th>On Trading 212</th><th>Key figures</th><th></th></tr></thead><tbody id="watchBody"></tbody></table></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><h2>Already holding or watching</h2><span class="mu" style="font-size:11px">From your profile</span></div>
+    <div class="list" id="holdList"></div>
+  </div>
+</section>
+
 <!-- ---------- TRACKER (Module 1, step 5) ---------- -->
 <section class="view" id="tracker">
   <div class="panel">
@@ -560,6 +602,7 @@ const SKILLS=[
   {name:"cold-email",purpose:"Short outreach and follow-ups to recruiters",src:"coreyhaines31/marketingskills",status:"Installed"},
   {name:"context-engineering",purpose:"/generate-prp and /execute-prp build commands",src:"coleam00/context-engineering-intro",status:"Installed"},
   {name:"ui-ux-pro-max",purpose:"Design system and UX rules for the dashboard",src:"nextlevelbuilder/ui-ux-pro-max-skill",status:"Installed"},
+  {name:"research-investments",purpose:"Builds sourced, balanced research cards for the Investments screen (built for M.A.R.C)",src:"dolarewaju/Believe",status:"Installed"},
   {name:"import-job-alerts",purpose:"Pulls jobs from your alert emails into the queue (built for M.A.R.C)",src:"dolarewaju/Believe",status:"Installed"},
   {name:"browser-use",purpose:"Not needed: Claude in Chrome covers employer forms",src:"browser-use/browser-use",status:"Skipped"},
   {name:"supermemory",purpose:"Cloud memory service (skipped for now)",src:"supermemoryai/supermemory",status:"Skipped"}
@@ -612,7 +655,7 @@ function net(){const c=navigator.connection;const el=document.getElementById('ne
 net();addEventListener('online',net);addEventListener('offline',net);if(navigator.connection)navigator.connection.addEventListener('change',net);
 
 // ---- view switching ----
-const PH={invest:["Investment Research","Module 2: research cards with YES / NO for Trading 212 ISA instruments."],watch:["Watchlist","Module 2: everything you said YES to, with date and reason."],agents:["Agents","Each agent's status and recent runs."],soon:["Coming later","Placeholder: built after Modules 1 and 2."]};
+const PH={agents:["Agents","Each agent's status and recent runs."],soon:["Coming later","Placeholder: built after Modules 1 and 2."]};
 function show(v){document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));
   const real=document.getElementById(v);
   if(real&&v!=='ph'){real.classList.add('on');}else{const [t,x]=PH[v]||PH.soon;document.getElementById('phTitle').textContent=t;document.getElementById('phText').textContent=x;document.getElementById('ph').classList.add('on');}}
@@ -749,6 +792,45 @@ document.getElementById('tracker').addEventListener('click',async e=>{
     await navigator.clipboard.writeText(followMsg(j));toast('Follow-up message copied. Paste it into an email or LinkedIn message.');}});
 document.getElementById('trkSearch').addEventListener('input',()=>loadTracker());
 document.querySelector('.nav[data-view="tracker"]').addEventListener('click',()=>setTimeout(loadTracker,0));
+
+// ================= INVESTMENTS =================
+let IF='new';
+const AV={available:'On your Trading 212 ✓',unverified:'Trading 212: not yet checked',not_found:'Not found on your Trading 212'};
+const li=a=>(a||[]).map(x=>`<li>${esc(x)}</li>`).join('');
+function cardHTML(c){return `<article class="icard" data-id="${c.id}">
+  <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><h3>${esc(c.name)}</h3><div class="sub">${esc(c.ticker||'')} · ${esc(c.type)}${c.isin?' · '+esc(c.isin):''} · researched ${fmtD(c.created)}</div></div>
+  <span class="avail av-${c.t212.status}" title="${esc(c.t212.note||'')}">${AV[c.t212.status]}</span></div>
+  <div><h4>What it is</h4><p>${esc(c.what)}</p></div>
+  <div><h4>Key numbers <span class="mu" style="letter-spacing:0;text-transform:none;font:400 10px var(--ui)">(${esc(c.data_as_of||'as of '+c.created)})</span></h4><div class="nums">${c.numbers.map(n=>`<div><small>${esc(n.label)}</small><b>${esc(n.value)}</b></div>`).join('')}</div></div>
+  <div class="two"><div><h4>Case for</h4><ul>${li(c.case_for)}</ul></div><div><h4>Case against</h4><ul>${li(c.case_against)}</ul></div></div>
+  <div><h4>Main risks</h4><ul>${li(c.risks)}</ul></div>
+  ${c.portfolio_note?`<div><h4>Next to what you already hold</h4><p>${esc(c.portfolio_note)}</p></div>`:''}
+  <div class="srcs"><h4>Sources</h4>${c.sources.map(s=>`<div><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a> · ${esc(s.date)}</div>`).join('')}</div>
+  ${c.status==='new'?`<div class="decide"><input placeholder="Your reason (optional)"><button class="btn yes" data-d="yes">YES</button><button class="btn nob" data-d="no">NO</button></div>`
+   :`<div class="decide"><span class="st st-${c.status==='yes'?'offer':'dismissed'}">${c.status==='yes'?'On watchlist':'Dismissed'} · ${fmtD(c.decided)}</span><span class="mu" style="font-size:11px;flex:1">${esc(c.reason||'')}</span><button class="btn sm" data-d="new">Undo</button></div>`}
+</article>`;}
+async function loadInvest(){
+  await READY;const cardsEl=document.getElementById('invCards');
+  if(!LOCAL){cardsEl.innerHTML='<div class="panel empty">Your research lives on your laptop. Open M.A.R.C there to see it.</div>';return;}
+  const d=await api('/api/invest');window._inv=d;
+  document.getElementById('t212Status').textContent=d.t212_count?`Trading 212 list: ${d.t212_count} instruments · updated ${d.t212_list.replace('T',' ')}`:'Trading 212 list not loaded: add a read-only API key';
+  const n=s=>d.cards.filter(c=>c.status===s).length;
+  document.getElementById('invFilters').innerHTML=[['new',`To review (${n('new')})`],['yes',`Said YES (${n('yes')})`],['no',`Said NO (${n('no')})`]].map(([k,l])=>`<button class="chip-f ${k===IF?'on':''}" data-if="${k}">${l}</button>`).join('');
+  const list=d.cards.filter(c=>c.status===IF);
+  cardsEl.innerHTML=list.length?list.map(cardHTML).join(''):`<div class="panel empty">${IF==='new'?'No new research cards. Ask Claude to <b>research new investment ideas</b>.':'Nothing here yet.'}</div>`;
+  const yes=d.cards.filter(c=>c.status==='yes').sort((a,b)=>(b.decided||'').localeCompare(a.decided||''));
+  document.getElementById('watchBody').innerHTML=yes.length?yes.map(c=>`<tr data-id="${c.id}"><td><b>${esc(c.name)}</b><br><small class="mu">${esc(c.ticker||'')}</small></td><td>${esc(c.type)}</td><td style="white-space:nowrap">${fmtD(c.decided)}</td><td>${esc(c.reason||'')}</td><td><span class="avail av-${c.t212.status}">${AV[c.t212.status]}</span></td><td><small>${c.numbers.slice(0,3).map(x=>esc(x.label)+': '+esc(x.value)).join('<br>')}</small><br><small class="mu">${esc(c.data_as_of||'as of '+c.created)}</small></td><td><button class="link" data-d="new">remove</button></td></tr>`).join(''):'<tr><td colspan="7" class="empty">Nothing yet. Say YES to a research card to add it here.</td></tr>';
+  const p=d.profile||{};const h=p.holdings||{};
+  document.getElementById('holdList').innerHTML=Object.entries(h).map(([k,v])=>`<div class="row"><div class="grow"><b>${esc(k)}</b><small class="mu">${esc(v.join(', '))}</small></div><span class="tag t-live">Holding</span></div>`).join('')+((p.watching||[]).length?`<div class="row"><div class="grow"><b>Watching</b><small class="mu">${esc(p.watching.join(', '))}</small></div><span class="tag t-info">Watching</span></div>`:'');
+}
+document.getElementById('invest').addEventListener('click',async e=>{
+  const f=e.target.closest('[data-if]');if(f){IF=f.dataset.if;return loadInvest();}
+  const b=e.target.closest('[data-d]');if(!b)return;const card=b.closest('[data-id]');const reason=card.querySelector('.decide input')?.value||'';
+  await api('/api/invest/decide',{id:card.dataset.id,decision:b.dataset.d,reason});
+  toast(b.dataset.d==='yes'?'Added to your watchlist.':b.dataset.d==='no'?'Dismissed.':'Moved back to review.');loadInvest();});
+document.getElementById('watch').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-d]');if(!b)return;await api('/api/invest/decide',{id:b.closest('[data-id]').dataset.id,decision:'new'});toast('Removed from watchlist. It\'s back in To review.');loadInvest();});
+['invest','watch'].forEach(v=>document.querySelector(`.nav[data-view="${v}"]`).addEventListener('click',()=>setTimeout(loadInvest,0)));
 
 // ---- dashboard: real numbers when running locally ----
 async function liveDash(){
