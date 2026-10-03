@@ -30,6 +30,8 @@ Project rule (CLAUDE.md): **the owner does the final click.** You fill in the fo
 - If `form_input` leaves a field empty (some phone fields reject spaces), click the field and type the value without spaces.
 - After filling, read the inputs back (e.g. via the page's form values) and show the user a table of what was entered.
 - Many sites show no confirmation message and simply clear the form after Submit. Ask the user to watch for a confirmation email.
+- If fields clear themselves after `form_input` (seen on SW6's site), set the values with a small script that uses the input's native value setter and fires `input` and `change` events, then read the values back.
+- SW6 Associates is one agency team: apply to a handful of distinct, best-fit listings, not every near-duplicate.
 
 ## Rules
 - Never invent answers, experience or qualifications. Use only the saved profile and true facts from `private/cv/master.json`.
