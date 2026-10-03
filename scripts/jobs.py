@@ -47,7 +47,9 @@ DEFAULT_CONFIG = {
                       "100% commission", "uncapped commission only", "ote only", "self-employed",
                       "door to door", "door-to-door"],
 }
-SENIOR = re.compile(r"\b(senior|sr\.?|head of|director|principal|vp|vice president|manager of)\b", re.I)
+SENIOR = re.compile(r"\b(senior|sr\.?|head of|director|principal|vp|vice president|manager of|global account|"
+                    r"enterprise|strategic account|large cust\w*)\b", re.I)
+LANGUAGE = re.compile(r"\b(french|german|spanish|italian|dutch|arabic|mandarin|portuguese|polish|japanese)[- ]speak", re.I)
 EXPERIENCE = re.compile(r"\b([3-9]|1\d)\+?\s*(?:-\s*\d+\s*)?years?'?(?:\s+[\w-]+){0,4}?\s+experience", re.I)
 ENTRY = re.compile(r"\b(graduate|entry[- ]level|junior|trainee|associate|no experience|apprentice)\b", re.I)
 
@@ -295,6 +297,10 @@ def score_job(job, roles, cfg):
     if SENIOR.search(job["title"]):
         score -= 40
         reasons.append("Senior title")
+    lang = LANGUAGE.search(text)
+    if lang:
+        score -= 35
+        reasons.append(f"Needs {lang.group(1).title()} speaker")
     m = EXPERIENCE.search(text)
     if m:
         score -= 25

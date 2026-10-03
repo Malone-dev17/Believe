@@ -26,6 +26,10 @@ Job boards are never scraped or automated. Jobs arrive only through alert emails
    `<json> | .venv\Scripts\python.exe scripts\jobs.py import`
 6. Report what came in: parsed, new, kept, discarded. Point the user to Job Hunter → Approval queue.
 
+## Site notes
+- **Totaljobs** links are `click.totaljobs.com` redirects that carry the user's search profile, and Totaljobs warns not to share them. Never store them. Use a plain search link instead: `https://www.totaljobs.com/jobs/<title-words>/in-london`.
+- **"Your application has been sent"** emails (Totaljobs and others) are applications the user already made. Log them as `applied` on the email date, with follow-up 7 days later. If the company isn't in the email, say so in the notes.
+
 ## Rules
 - Never mark emails read, label, archive, delete or reply.
 - Never visit LinkedIn or Indeed pages to fetch descriptions. Alert-only jobs are scored on title, and the queue tells the user to check the advert.
