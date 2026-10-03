@@ -12,7 +12,9 @@ You produce **research and facts, not personal financial advice**. Never tell th
 - `private/invest/cards.json`: existing cards. Don't duplicate.
 
 ## Picking candidates
-Match the user's stated scope (asset types and markets in the profile). For each batch, mix instrument types and regions, and include at least one idea that differs from what they already hold. You may also research names on their "watching" list when asked.
+Match the user's stated scope (asset types and markets in the profile). The user prefers **individual stocks** (set 3 Oct 2026), so batches are stocks unless they ask for ETFs. Within a batch, vary sector and region (UK, US, Europe, emerging markets), and include at least one company outside AI, chips and data centres, because their holdings are already concentrated there. Don't repeat any company that already has a card. You may also research names on their "watching" list when asked.
+
+Every stock card must state its largest documented fall against the user's 20% limit. Stocks are more volatile than funds: say so plainly, without telling the user what to do.
 
 ## Each card needs (scripts/invest.py rejects cards without them)
 - `name`, `ticker` (LSE or US symbol), `isin` if known, `type` (ETF / Stock / Investment trust)
