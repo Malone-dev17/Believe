@@ -795,11 +795,11 @@ document.querySelector('.nav[data-view="tracker"]').addEventListener('click',()=
 
 // ================= INVESTMENTS =================
 let IF='new';
-const AV={available:'On your Trading 212 ✓',unverified:'Trading 212: not yet checked',not_found:'Not found on your Trading 212'};
+const AV={available:'On Trading 212 ✓',unverified:'Trading 212: not yet checked',not_found:'Not found on your Trading 212'};
 const li=a=>(a||[]).map(x=>`<li>${esc(x)}</li>`).join('');
 function cardHTML(c){return `<article class="icard" data-id="${c.id}">
   <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><h3>${esc(c.name)}</h3><div class="sub">${esc(c.ticker||'')} · ${esc(c.type)}${c.isin?' · '+esc(c.isin):''} · researched ${fmtD(c.created)}</div></div>
-  <span class="avail av-${c.t212.status}" title="${esc(c.t212.note||'')}">${AV[c.t212.status]}</span></div>
+  <span class="avail av-${c.t212.status}" title="${esc(c.t212.note||'')}">${AV[c.t212.status]}${c.t212.symbol?' · '+esc(c.t212.symbol)+' ('+esc(c.t212.currency)+')':''}</span></div>
   <div><h4>What it is</h4><p>${esc(c.what)}</p></div>
   <div><h4>Key numbers <span class="mu" style="letter-spacing:0;text-transform:none;font:400 10px var(--ui)">(${esc(c.data_as_of||'as of '+c.created)})</span></h4><div class="nums">${c.numbers.map(n=>`<div><small>${esc(n.label)}</small><b>${esc(n.value)}</b></div>`).join('')}</div></div>
   <div class="two"><div><h4>Case for</h4><ul>${li(c.case_for)}</ul></div><div><h4>Case against</h4><ul>${li(c.case_against)}</ul></div></div>

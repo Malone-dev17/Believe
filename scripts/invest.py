@@ -64,8 +64,10 @@ def find_instrument(symbol=None, isin=None):
             best, best_score = ins, score
     if not best:
         return {}
-    return {"t212_ticker": best.get("ticker"), "name": best.get("name"), "isin": best.get("isin"),
-            "currency": best.get("currencyCode"), "type": best.get("type")}
+    # shortName is the real exchange ticker (e.g. NBIS); "ticker" is Trading 212's internal ID,
+    # which can keep a company's old symbol (e.g. YNDX_US_EQ for Nebius).
+    return {"symbol": best.get("shortName"), "t212_id": best.get("ticker"), "name": best.get("name"),
+            "isin": best.get("isin"), "currency": best.get("currencyCode"), "type": best.get("type")}
 
 
 def availability(card):
