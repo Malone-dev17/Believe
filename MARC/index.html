@@ -183,6 +183,34 @@ main{min-width:0}
 .input{display:flex;gap:8px;align-items:center;margin-top:10px;border-top:1px solid var(--line);padding-top:10px}
 .input .btn.go{background:rgba(52,211,153,.15);border-color:var(--green);color:var(--green)}
 
+/* job hunter */
+#jobs{grid-template-columns:minmax(0,1fr);gap:12px;align-content:start}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:rgba(3,11,23,.45)}
+.stat small{color:var(--muted);font-size:10.5px;display:block}.stat b{font:600 20px var(--ui);color:var(--text);font-variant-numeric:tabular-nums}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.tabs{display:flex;gap:4px}.tab{padding:7px 14px;border-radius:8px;border:1px solid transparent;color:var(--muted)}
+.tab.on{border-color:var(--line-strong);color:#fff;background:rgba(34,211,238,.1)}
+.job{border:1px solid var(--line);border-radius:8px;background:rgba(3,11,23,.45);margin-bottom:6px}
+.job>header{display:grid;grid-template-columns:22px 46px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 12px;cursor:pointer}
+.job input[type=checkbox]{width:16px;height:16px;accent-color:var(--cyan)}
+.sc{font:700 13px var(--display);text-align:center;border-radius:6px;padding:4px 0}
+.sc.hi{color:var(--green);background:rgba(52,211,153,.12)}.sc.md{color:var(--amber);background:rgba(251,191,36,.12)}
+.job h3{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.job .meta{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.job .detail{display:none;padding:0 12px 12px 90px;font-size:12px;color:#b9cde3}
+.job.open .detail{display:block}
+.job textarea,.addform input,.addform textarea{width:100%;background:rgba(3,11,23,.7);border:1px solid var(--line);border-radius:6px;color:var(--text);font:12px/1.5 var(--ui);padding:8px}
+.job textarea{min-height:150px;margin:6px 0}
+.why{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}.why span{font-size:10.5px;border:1px solid var(--line);border-radius:12px;padding:2px 8px;color:var(--cyan-soft)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.btn.sm{padding:5px 10px;font-size:11.5px}
+.btn.ok{border-color:var(--green);color:var(--green)}.btn.no{border-color:rgba(248,113,113,.5);color:var(--red)}
+.addform{display:none;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:10px}
+.addform.on{display:grid}.addform textarea{grid-column:1/-1;min-height:70px}
+.empty{color:var(--muted);text-align:center;padding:30px 10px}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--panel-solid);border:1px solid var(--cyan);border-radius:8px;padding:10px 18px;box-shadow:var(--glow);display:none;z-index:9}
+
 /* placeholders */
 .ph-view{place-items:center;min-height:500px;text-align:center}
 .ph-view p{color:var(--muted);max-width:420px;margin-top:8px}
@@ -402,6 +430,36 @@ main{min-width:0}
   </div>
 </section>
 
+<!-- ---------- JOB HUNTER (Module 1) ---------- -->
+<section class="view" id="jobs">
+  <div class="panel">
+    <div class="ph"><h2>Job Hunter</h2><span class="mu" id="srcStatus" style="font-size:11px"></span></div>
+    <div class="stats" id="jobStats"></div>
+    <div class="bar" style="margin-top:12px">
+      <button class="btn" id="runBtn"><svg class="bi" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>Find &amp; prepare new roles</button>
+      <button class="btn" id="addBtn"><svg class="bi" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a job link</button>
+      <span class="mu" style="font-size:11px">LinkedIn, Indeed, Totaljobs, WttJ and Handshake roles come in via alert emails or links you add, never by automating those sites.</span>
+    </div>
+    <div class="addform" id="addForm">
+      <input id="aUrl" placeholder="Job link (https://…)"><input id="aTitle" placeholder="Job title"><input id="aCompany" placeholder="Company">
+      <input id="aSource" placeholder="Site (e.g. LinkedIn)"><textarea id="aDesc" placeholder="Paste the job description (helps scoring)"></textarea>
+      <div class="acts"><button class="btn ok sm" id="aSave">Add, score &amp; prepare</button></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph">
+      <div class="tabs"><button class="tab on" data-tab="queued">Approval queue <span id="qN"></span></button><button class="tab" data-tab="approved">Ready to submit <span id="aN"></span></button></div>
+      <div class="bar" id="bulk">
+        <label class="mu" style="font-size:11.5px;display:flex;gap:6px;align-items:center"><input type="checkbox" id="selAll" style="accent-color:var(--cyan)">Select all</label>
+        <button class="btn ok sm" data-bulk="approved">Approve selected</button>
+        <button class="btn no sm" data-bulk="dismissed">Dismiss selected</button>
+      </div>
+    </div>
+    <div id="jobList"></div>
+  </div>
+</section>
+<div class="toast" id="toast"></div>
+
 <!-- ---------- SKILLS ---------- -->
 <section class="view" id="skills" style="grid-template-columns:minmax(0,1fr);gap:12px">
   <div class="panel">
@@ -488,11 +546,85 @@ function net(){const c=navigator.connection;const el=document.getElementById('ne
 net();addEventListener('online',net);addEventListener('offline',net);if(navigator.connection)navigator.connection.addEventListener('change',net);
 
 // ---- view switching ----
-const PH={jobs:["Job Hunter","Module 1: CV intake, 20 target roles, master CV and the application queue."],tracker:["Tracker","Module 1: every application with status, follow-ups, and daily/weekly totals."],invest:["Investment Research","Module 2: research cards with YES / NO for Trading 212 ISA instruments."],watch:["Watchlist","Module 2: everything you said YES to, with date and reason."],agents:["Agents","Each agent's status and recent runs."],soon:["Coming later","Placeholder: built after Modules 1 and 2."]};
+const PH={tracker:["Tracker","Module 1: every application with status, follow-ups, and daily/weekly totals."],invest:["Investment Research","Module 2: research cards with YES / NO for Trading 212 ISA instruments."],watch:["Watchlist","Module 2: everything you said YES to, with date and reason."],agents:["Agents","Each agent's status and recent runs."],soon:["Coming later","Placeholder: built after Modules 1 and 2."]};
 function show(v){document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));
   const real=document.getElementById(v);
   if(real&&v!=='ph'){real.classList.add('on');}else{const [t,x]=PH[v]||PH.soon;document.getElementById('phTitle').textContent=t;document.getElementById('phText').textContent=x;document.getElementById('ph').classList.add('on');}}
 document.querySelectorAll('.nav').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('on'));b.classList.add('on');show(b.dataset.view);}));
+// ================= JOB HUNTER =================
+const api=async(path,body)=>{const r=await fetch(path,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{});const j=await r.json();if(j.error)throw new Error(j.error);return j;};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toast=m=>{const t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',3500);};
+let JOBS=[],TAB='queued',LOCAL=false;
+const money=j=>{const a=j.salary_min,b=j.salary_max;if(!a&&!b)return'Salary not given';const f=n=>'£'+Math.round(n/1000)+'k';return a&&b&&a!==b?`${f(a)}–${f(b)}`:f(a||b);};
+async function loadJobs(){
+  try{const s=await api('/api/status');LOCAL=true;
+    JOBS=await api('/api/jobs');const st=s.stats;
+    document.getElementById('srcStatus').textContent=`Reed API: ${s.reed?'connected':'no key yet'} · Adzuna API: ${s.adzuna?'connected':'no key yet'}`;
+    document.getElementById('jobStats').innerHTML=[['Found',st.found],['Discarded',st.discarded],['In queue',st.queued],['Ready to submit',st.approved],['Applied today',st.applied_today],['Applied this week',st.applied_week],['Response rate',st.response_rate+'%']].map(([l,v])=>`<div class="stat"><small>${l}</small><b>${v}</b></div>`).join('');
+    document.querySelector('.nav[data-view="jobs"] .n').textContent=st.queued;
+    renderJobs();
+  }catch(e){LOCAL=false;
+    document.getElementById('jobStats').innerHTML='';
+    document.getElementById('jobList').innerHTML=`<div class="empty">Your job data stays on your laptop.<br>Open M.A.R.C with <b>Open MARC.bat</b> to see your queue.</div>`;
+    document.getElementById('srcStatus').textContent='Online preview';}
+}
+function renderJobs(){
+  const list=JOBS.filter(j=>j.status===TAB).sort((a,b)=>(b.score||0)-(a.score||0));
+  document.getElementById('qN').textContent=`(${JOBS.filter(j=>j.status==='queued').length})`;
+  document.getElementById('aN').textContent=`(${JOBS.filter(j=>j.status==='approved').length})`;
+  document.getElementById('bulk').style.display=TAB==='queued'?'flex':'none';
+  document.getElementById('selAll').checked=false;
+  if(!list.length){document.getElementById('jobList').innerHTML=`<div class="empty">${TAB==='queued'?'Nothing waiting for approval. Click <b>Find &amp; prepare new roles</b> or add a job link.':'Nothing approved yet.'}</div>`;return;}
+  document.getElementById('jobList').innerHTML=list.map(j=>`
+  <article class="job" data-id="${j.id}">
+    <header>${TAB==='queued'?`<input type="checkbox" class="pick" aria-label="Select">`:'<span></span>'}
+      <span class="sc ${j.score>=80?'hi':'md'}">${j.score??'–'}</span>
+      <div style="min-width:0"><h3>${esc(j.title)} · ${esc(j.company||'Unknown company')}</h3><div class="meta">${esc(j.location||'')} · ${money(j)} · ${esc(j.source)} · CV: ${esc(j.cv_role||'')}</div></div>
+      <div class="acts">${TAB==='approved'?`<a class="btn sm" href="${esc(j.url)}" target="_blank" rel="noopener">Open job ↗</a><a class="btn sm" href="/${esc(j.cv_file)}" download>CV</a><button class="btn sm" data-copy>Copy note</button><button class="btn ok sm" data-set="applied">Mark applied</button>`:`<button class="btn ok sm" data-set="approved">Approve</button><button class="btn no sm" data-set="dismissed">Dismiss</button>`}</div>
+    </header>
+    <div class="detail">
+      <div class="why">${(j.reasons||[]).map(r=>`<span>${esc(r)}</span>`).join('')}</div>
+      <p>${esc(j.description)}${j.description&&j.description.length>=700?'…':''}</p>
+      <p style="margin-top:8px" class="mu">Cover note (edit freely, then save):</p>
+      <textarea>${esc(j.note)}</textarea>
+      <div class="acts"><button class="btn sm" data-savenote>Save note</button><a class="btn sm" href="/${esc(j.cv_file)}" download>Download CV</a><a class="btn sm" href="${esc(j.url)}" target="_blank" rel="noopener">View advert ↗</a></div>
+    </div>
+  </article>`).join('');
+}
+document.getElementById('jobList').addEventListener('click',async e=>{
+  const art=e.target.closest('.job');if(!art)return;const id=art.dataset.id;const j=JOBS.find(x=>x.id===id);
+  if(e.target.closest('[data-set]')){e.stopPropagation();const s=e.target.closest('[data-set]').dataset.set;await api('/api/jobs/update',{ids:[id],status:s});toast(s==='applied'?'Logged as applied. Follow-up set for 7 days.':s==='approved'?'Approved. It\'s in Ready to submit.':'Dismissed.');return loadJobs();}
+  if(e.target.closest('[data-savenote]')){await api('/api/jobs/note',{id,text:art.querySelector('textarea').value});return toast('Cover note saved.');}
+  if(e.target.closest('[data-copy]')){e.stopPropagation();await navigator.clipboard.writeText(j.note);return toast('Cover note copied. Paste it into the application.');}
+  if(e.target.closest('a,input,textarea,button'))return;
+  art.classList.toggle('open');
+});
+document.querySelectorAll('[data-bulk]').forEach(b=>b.addEventListener('click',async()=>{
+  const ids=[...document.querySelectorAll('.pick:checked')].map(c=>c.closest('.job').dataset.id);
+  if(!ids.length)return toast('Tick some roles first.');
+  await api('/api/jobs/update',{ids,status:b.dataset.bulk});toast(`${ids.length} ${b.dataset.bulk}.`);loadJobs();}));
+document.getElementById('selAll').addEventListener('change',e=>document.querySelectorAll('.pick').forEach(c=>c.checked=e.target.checked));
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');TAB=t.dataset.tab;renderJobs();}));
+document.getElementById('runBtn').addEventListener('click',async e=>{
+  if(!LOCAL)return toast('Open M.A.R.C on your laptop to run the pipeline.');
+  const b=e.currentTarget;b.disabled=true;b.lastChild.textContent='Working… (can take a minute)';
+  try{const r=await api('/api/run',{step:'run'});const f=r.fetch;toast(`Fetched ${f.fetched}, ${f.added} new · kept ${r.score.kept}, discarded ${r.score.discarded} · ${r.tailor.queued} queued`+(f.notes.length?' · '+f.notes.join('; '):''));}
+  catch(err){toast('Problem: '+err.message);}
+  b.disabled=false;b.lastChild.textContent='Find & prepare new roles';loadJobs();});
+document.getElementById('addBtn').addEventListener('click',()=>document.getElementById('addForm').classList.toggle('on'));
+document.getElementById('aSave').addEventListener('click',async()=>{
+  if(!LOCAL)return toast('Open M.A.R.C on your laptop to add jobs.');
+  const v=id=>document.getElementById(id).value.trim();
+  if(!v('aUrl')||!v('aTitle')||!v('aCompany'))return toast('Link, title and company are needed.');
+  try{await api('/api/jobs/add',{url:v('aUrl'),title:v('aTitle'),company:v('aCompany'),source:v('aSource')||'Manual',description:v('aDesc')});
+    const r=await api('/api/run',{step:'score'});await api('/api/run',{step:'tailor'});
+    toast(r.score.kept?'Added. It scored well and is in your queue.':'Added, but it scored below your threshold, so it was discarded.');
+    ['aUrl','aTitle','aCompany','aSource','aDesc'].forEach(i=>document.getElementById(i).value='');}
+  catch(err){toast('Problem: '+err.message);}
+  loadJobs();});
+loadJobs();
+
 if(location.hash){const b=document.querySelector(`.nav[data-view="${location.hash.slice(1)}"]`);if(b)b.click();}
 document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>document.querySelector(`.nav[data-view="${b.dataset.goto}"]`).click()));
 </script>
