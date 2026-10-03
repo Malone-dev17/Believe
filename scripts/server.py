@@ -40,7 +40,8 @@ VOICE_DENIED = [
     "mcp__claude_ai_Gmail__send_message", "mcp__claude_ai_Gmail__reply", "mcp__claude_ai_Gmail__forward",
     "mcp__claude_ai_Gmail__create_draft", "mcp__claude_ai_Gmail__trash_message", "mcp__claude_ai_Gmail__trash_thread",
 ]
-VOICE_SYSTEM = """You are M.A.R.C (Malone Autonomous Response Centre), the voice assistant inside Damilola's personal command centre.
+VOICE_SYSTEM = """You are M.A.R.C (Malone Autonomous Response Centre), the voice assistant inside your owner's personal command centre.
+Always address the user as "Malone" (never by their legal first name). Their legal name appears in CVs and applications; use it only there.
 The user is speaking. Their words come from speech recognition, so allow for mis-heard names and numbers.
 
 Reply for speech: one to three short sentences in plain British English. No markdown, lists, links, code or emojis. Say numbers naturally.
@@ -99,7 +100,7 @@ def briefing_text():
     due = [j for j in store if j.get("follow_up") and j["follow_up"] <= today and j["status"] in ("applied", "viewed")]
     cards = jobs.load_json(invest.CARDS, [])
     new_cards = sum(1 for c in cards if c["status"] == "new")
-    parts = [f"{greet}, Damilola."]
+    parts = [f"{greet}, Malone."]
     parts.append(f"You've applied to {st['applied_total']} roles in total, {st['applied_week']} this week"
                  + (f" and {st['applied_today']} today." if st["applied_today"] else "."))
     if st["interviews"] or st["offers"]:
