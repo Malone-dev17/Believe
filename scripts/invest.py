@@ -49,13 +49,23 @@ def find_instrument(symbol=None, isin=None):
     if not cache:
         return None
     sym = (symbol or "").upper()
+    best, best_score = None, 0
     for ins in cache["instruments"]:
         t212 = ins.get("ticker", "")
-        base = re.split(r"_|\.", t212)[0].rstrip("l").upper() if t212 else ""
-        if (isin and ins.get("isin") == isin) or (sym and (ins.get("shortName", "").upper() == sym or base == sym)):
-            return {"t212_ticker": t212, "name": ins.get("name"), "isin": ins.get("isin"),
-                    "currency": ins.get("currencyCode"), "type": ins.get("type")}
-    return {}
+        m = re.match(r"([A-Z0-9.]+)([a-z]?)\d*_", t212)
+        base, venue = (m.group(1), m.group(2)) if m else ("", "")
+        hit_isin = bool(isin) and ins.get("isin") == isin
+        hit_sym = bool(sym) and (ins.get("shortName", "").upper() == sym or base == sym)
+        if not (hit_isin or hit_sym):
+            continue
+        # Prefer the exact ticker, then London ("l") and US listings over other exchanges.
+        score = 4 * (base == sym) + 2 * hit_isin + 2 * (venue == "l" or t212.endswith("_US_EQ")) + 1
+        if score > best_score:
+            best, best_score = ins, score
+    if not best:
+        return {}
+    return {"t212_ticker": best.get("ticker"), "name": best.get("name"), "isin": best.get("isin"),
+            "currency": best.get("currencyCode"), "type": best.get("type")}
 
 
 def availability(card):
