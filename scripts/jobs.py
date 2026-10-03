@@ -255,6 +255,10 @@ ALIASES = {
     "account development representative": "Sales Development Representative (SDR)",
     "sales associate": "Graduate Sales Executive",
     "new business executive": "Business Development Executive (Graduate / Junior)",
+    "recruitment consultant": "Trainee Recruitment Consultant",
+    "graduate recruitment consultant": "Trainee Recruitment Consultant",
+    "recruitment resourcer": "Trainee Recruitment Consultant",
+    "associate recruitment consultant": "Trainee Recruitment Consultant",
 }
 
 
@@ -362,6 +366,7 @@ PITCH = {
     "pharma_sales": "I studied Pharmaceutical Science at the University of Birmingham, hold A grades in A-level Biology and Chemistry, and now manage 5 client relationships in a sales-facing role.",
     "fintech_client": "I manage 5 client relationships and have taken part in several deals and contract signings, with finance exposure from GHO Capital and Citi's finance programme.",
     "account_customer": "I manage 5 client relationships and turn their requirements into daily priorities for my team, so I know what keeps a client happy.",
+    "recruitment": "I manage 5 client relationships, have taken part in several deals and contract signings, and I've done cold calling. I also guided around 20 students one-to-one through Sixth Form applications, and every one of them received an offer.",
     "commercial_ops": "I've worked across client sales, warehouse operations and investment research, and used data analysis on BCG's programme to produce business recommendations.",
 }
 
