@@ -4,11 +4,15 @@ Binds to 127.0.0.1 only, so nothing outside this laptop can reach it.
   python scripts/server.py            # then open http://127.0.0.1:8765/MARC/
 """
 import json
+import shutil
+import subprocess
 import sys
+import threading
+import uuid
 from datetime import date, timedelta
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import urlparse, unquote
+from urllib.parse import urlparse, unquote, parse_qs
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import jobs  # noqa: E402
@@ -19,6 +23,69 @@ PORT = 8765
 STATUSES = {"queued", "approved", "dismissed", "applied", "viewed", "interview", "rejected", "offer"}
 BLOCKED = ("/private", "/.venv", "/.git", "/.claude")
 DOWNLOADABLE = ("/private/cv/out/",)
+
+
+# ------------------------------------------------------------------ voice: headless Claude Code
+
+CLAUDE = shutil.which("claude") or str(Path.home() / ".local" / "bin" / "claude.exe")
+PY = ".venv/Scripts/python.exe"
+VOICE_ALLOWED = [
+    "Read", "Grep", "Glob", "WebSearch", "WebFetch", "Skill",
+    f"Bash({PY} scripts/marc.py:*)",
+    f"Bash({PY} scripts/invest.py instruments)",
+    "mcp__claude_ai_Gmail__search_threads", "mcp__claude_ai_Gmail__get_thread", "mcp__claude_ai_Gmail__get_message",
+]
+VOICE_DENIED = [
+    "Write", "Edit", "NotebookEdit", "Read(./private/keys.env)", "Bash(git:*)",
+    "mcp__claude_ai_Gmail__send_message", "mcp__claude_ai_Gmail__reply", "mcp__claude_ai_Gmail__forward",
+    "mcp__claude_ai_Gmail__create_draft", "mcp__claude_ai_Gmail__trash_message", "mcp__claude_ai_Gmail__trash_thread",
+]
+VOICE_SYSTEM = """You are M.A.R.C (Malone Autonomous Response Centre), the voice assistant inside Damilola's personal command centre.
+The user is speaking. Their words come from speech recognition, so allow for mis-heard names and numbers.
+
+Reply for speech: one to three short sentences in plain British English. No markdown, lists, links, code or emojis. Say numbers naturally.
+
+Do all reading and changes with `.venv/Scripts/python.exe scripts/marc.py <command>` (run `--help` once if unsure). Look up job or card ids before changing anything. If a request is ambiguous, ask one short question instead of guessing.
+- Import job alerts: follow .claude/skills/import-job-alerts/SKILL.md. Read Gmail with search and get tools only, then add jobs with `marc.py import-alerts '<json>'`.
+- Research investments: follow .claude/skills/research-investments/SKILL.md. Check tickers with `marc.py check-ticker`, add cards with `marc.py add-cards '<json>'`. Research and facts, never advice.
+
+You must not submit job applications, place trades, send, reply to or forward emails, edit files directly, use git, or read out keys or full contact details. If asked for any of these, say briefly that it isn't available by voice and point to the M.A.R.C screen."""
+VOICE_TASKS = {}
+VOICE_LOCK = threading.Lock()
+
+
+def run_voice(task_id, text, session):
+    cmd = [CLAUDE, "-p", "--output-format", "json", "--model", "sonnet",
+           "--append-system-prompt", VOICE_SYSTEM + f"\nToday's date: {date.today().isoformat()}.",
+           "--allowedTools", *VOICE_ALLOWED, "--disallowedTools", *VOICE_DENIED]
+    if session:
+        cmd += ["--resume", session]
+    try:
+        p = subprocess.run(cmd, input=text, capture_output=True, text=True, encoding="utf-8", cwd=ROOT,
+                           timeout=600, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        data = json.loads(p.stdout or "{}")
+        VOICE_TASKS[task_id] = {
+            "status": "error" if data.get("is_error") else "done",
+            "reply": data.get("result") or (p.stderr.strip()[-300:] or "Sorry, I couldn't get an answer."),
+            "session": data.get("session_id") or session,
+        }
+    except subprocess.TimeoutExpired:
+        VOICE_TASKS[task_id] = {"status": "error", "reply": "That took too long, so I stopped. Try a smaller request.", "session": session}
+    except Exception as e:
+        VOICE_TASKS[task_id] = {"status": "error", "reply": f"Voice link problem: {e}", "session": session}
+    finally:
+        VOICE_LOCK.release()
+
+
+def start_voice(text, session=None):
+    if not Path(CLAUDE).exists() and not shutil.which("claude"):
+        raise RuntimeError("Claude Code isn't installed. See Phase 1 in the guide.")
+    if not VOICE_LOCK.acquire(blocking=False):
+        raise RuntimeError("I'm still working on your last request.")
+    task_id = uuid.uuid4().hex[:10]
+    VOICE_TASKS[task_id] = {"status": "working"}
+    threading.Thread(target=run_voice, args=(task_id, text.strip()[:2000], session), daemon=True).start()
+    return task_id
 
 
 def jobs_view():
@@ -90,6 +157,9 @@ class Handler(SimpleHTTPRequestHandler):
                                "stats": stats()})
         if path == "/api/jobs":
             return self._json(jobs_view())
+        if path == "/api/voice":
+            task = parse_qs(urlparse(self.path).query).get("task", [""])[0]
+            return self._json(VOICE_TASKS.get(task, {"status": "unknown"}))
         if path == "/api/invest":
             prof = jobs.load_json(ROOT / "private" / "profile.json", {}).get("investing", {})
             cache = jobs.load_json(invest.INSTRUMENTS, {})
@@ -111,6 +181,8 @@ class Handler(SimpleHTTPRequestHandler):
             data = self._body()
             if path == "/api/jobs/update":
                 return self._json(update(data))
+            if path == "/api/voice":
+                return self._json({"task": start_voice(data["text"], data.get("session"))})
             if path == "/api/invest/decide":
                 return self._json(invest.decide(data["id"], data["decision"], data.get("reason", "")))
             if path == "/api/jobs/note":

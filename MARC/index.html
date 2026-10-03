@@ -260,6 +260,25 @@ table.trk{width:100%;border-collapse:collapse;min-width:900px;font-size:12px}
 .av-available{color:var(--green)}.av-unverified{color:var(--amber)}.av-not_found{color:var(--red)}
 @media (max-width:700px){.cards{grid-template-columns:minmax(0,1fr)}.two{grid-template-columns:1fr}}
 
+/* voice */
+.mic{border:0;cursor:pointer;transition:transform .15s,box-shadow .2s}
+.mic:hover{transform:scale(1.04)}
+.wave span{animation-play-state:paused}
+body.v-listening .wave span,body.v-speaking .wave span{animation-play-state:running}
+body.v-listening .mic{box-shadow:0 0 0 8px rgba(52,211,153,.15),0 0 0 16px rgba(52,211,153,.08),0 0 34px rgba(52,211,153,.6);background:radial-gradient(circle,#047857 0,#064e3b 60%)}
+body.v-thinking .mic{animation:pl 1.2s ease-in-out infinite}
+body.v-listening .talk{border-color:var(--green);box-shadow:0 0 22px rgba(52,211,153,.45)}
+.talk{cursor:pointer;color:inherit;font:inherit}
+.vlog{position:fixed;right:16px;bottom:84px;width:min(380px,calc(100vw - 32px));max-height:min(460px,60vh);display:none;flex-direction:column;background:var(--panel-solid);border:1px solid var(--line-strong);border-radius:12px;padding:12px 14px;box-shadow:0 10px 40px rgba(0,0,0,.5),var(--glow);z-index:8}
+.vlog.on{display:flex}
+.vmsgs{overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px;flex:1}
+.vm{font-size:12.5px;line-height:1.45;padding:8px 10px;border-radius:10px;max-width:92%}
+.vm.you{align-self:flex-end;background:rgba(34,211,238,.12);border:1px solid var(--line)}
+.vm.marc{align-self:flex-start;background:rgba(3,11,23,.7);border:1px solid var(--line-strong)}
+.vm.wait{color:var(--muted);font-style:italic}
+.vform{display:flex;gap:6px;margin-top:10px}
+.vform input{flex:1;min-width:0;background:rgba(3,11,23,.7);border:1px solid var(--line);border-radius:6px;color:var(--text);padding:7px 9px;font:12px var(--ui)}
+
 /* placeholders */
 .ph-view{place-items:center;min-height:500px;text-align:center}
 .ph-view p{color:var(--muted);max-width:420px;margin-top:8px}
@@ -307,12 +326,15 @@ table.trk{width:100%;border-collapse:collapse;min-width:900px;font-size:12px}
     <button class="nav" data-view="soon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/></svg>Knowledge Base<span class="soon">Soon</span></button>
   </nav>
   <div class="panel voice">
-    <div class="ph"><h2>Voice Status</h2><span class="tag t-off">Preview</span></div>
+    <div class="ph"><h2>Voice Status</h2><span class="tag t-off" id="voiceTag">Offline</span></div>
     <div class="wave" id="wave"></div>
-    <small class="mu">Standing by…</small>
-    <div class="mic"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
-    <small class="mu">Voice coming in a later version</small>
-    <div style="margin-top:12px"><button class="btn" style="width:100%"><svg class="bi" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>Focus Mode</button></div>
+    <small class="mu" id="voiceState">Standing by…</small>
+    <button class="mic" id="micBtn" title="Click to talk, or hold Space" aria-label="Talk to M.A.R.C"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+    <small class="mu" id="voiceHint">Click the mic or hold Space to talk</small>
+    <div style="margin-top:10px;display:flex;gap:6px">
+      <select id="voiceSel" title="M.A.R.C's voice" style="flex:1;min-width:0;background:rgba(3,11,23,.7);border:1px solid var(--line);border-radius:8px;color:var(--text);font:11px var(--ui);padding:6px"></select>
+      <button class="btn sm" id="newChat" title="Start a new conversation">New</button>
+    </div>
   </div>
 </aside>
 
@@ -516,6 +538,11 @@ table.trk{width:100%;border-collapse:collapse;min-width:900px;font-size:12px}
   </div>
 </section>
 <div class="toast" id="toast"></div>
+<aside class="vlog" id="voiceLog" aria-live="polite">
+  <div class="ph" style="margin-bottom:8px"><h2>M.A.R.C Voice</h2><button class="link" id="vlogClose" aria-label="Close">✕</button></div>
+  <div class="vmsgs" id="vmsgs"></div>
+  <form id="vform" class="vform"><input id="vinput" placeholder="Or type a command…" autocomplete="off"><button class="btn sm">Send</button></form>
+</aside>
 
 <!-- ---------- INVESTMENTS (Module 2) ---------- -->
 <section class="view" id="invest">
@@ -588,9 +615,9 @@ table.trk{width:100%;border-collapse:collapse;min-width:900px;font-size:12px}
   <div class="chip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><div><small>Weather</small><b id="wx">Loading…</b></div></div>
   <div class="chip"><svg viewBox="0 0 24 24"><path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M2 9a15 15 0 0 1 20 0M12 20h.01"/></svg><div><small>Network</small><b id="net">—</b></div></div>
   <div class="dots"></div>
-  <div class="talk"><b>TALK TO M.A.R.C</b><small>Voice preview · coming later</small></div>
+  <button class="talk" id="talkBtn"><b>TALK TO M.A.R.C</b><small id="talkSub">Click or hold Space</small></button>
   <div class="dots"></div>
-  <button class="btn"><svg class="bi" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Executive Briefing</button>
+  <button class="btn" id="briefBtn"><svg class="bi" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Executive Briefing</button>
 </footer>
 </div>
 
@@ -832,6 +859,67 @@ document.getElementById('invest').addEventListener('click',async e=>{
 document.getElementById('watch').addEventListener('click',async e=>{
   const b=e.target.closest('[data-d]');if(!b)return;await api('/api/invest/decide',{id:b.closest('[data-id]').dataset.id,decision:'new'});toast('Removed from watchlist. It\'s back in To review.');loadInvest();});
 ['invest','watch'].forEach(v=>document.querySelector(`.nav[data-view="${v}"]`).addEventListener('click',()=>setTimeout(loadInvest,0)));
+
+// ================= VOICE =================
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}};
+const V={state:'idle',rec:null,busy:false,session:store.get('marcSession'),heard:''};
+const vEl=id=>document.getElementById(id);
+function vState(s,text){
+  V.state=s;document.body.classList.remove('v-listening','v-thinking','v-speaking');if(s!=='idle')document.body.classList.add('v-'+s);
+  const tag=vEl('voiceTag');const map={idle:['Ready','t-live'],listening:['Listening','t-live'],thinking:['Working','t-warn'],speaking:['Speaking','t-info'],offline:['Offline','t-off']};
+  const [l,c]=map[s]||map.idle;tag.textContent=l;tag.className='tag '+c;
+  vEl('voiceState').textContent=text||({idle:'Standing by…',listening:'Listening…',thinking:'Working on it…',speaking:'Speaking…',offline:'Open M.A.R.C on your laptop to talk'})[s];
+  vEl('talkSub').textContent=({idle:'Click or hold Space',listening:'Listening… release to send',thinking:'Working on it…',speaking:'Speaking… click to stop',offline:'Laptop only'})[s];
+}
+function vLog(who,text,cls=''){const box=vEl('vmsgs');const d=document.createElement('div');d.className='vm '+who+' '+cls;d.textContent=text;box.appendChild(d);box.scrollTop=box.scrollHeight;vEl('voiceLog').classList.add('on');return d;}
+// ---- speaking ----
+function pickVoice(){const vs=speechSynthesis.getVoices();const saved=store.get('marcVoice');return vs.find(v=>v.name===saved)||vs.find(v=>/en-GB/i.test(v.lang)&&/Ryan|Sonia|Libby|Google UK English Male|Natural/i.test(v.name))||vs.find(v=>/en-GB/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang));}
+function fillVoices(){const vs=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));const cur=pickVoice();vEl('voiceSel').innerHTML=vs.map(v=>`<option ${cur&&v.name===cur.name?'selected':''}>${esc(v.name)}</option>`).join('')||'<option>Default voice</option>';}
+if('speechSynthesis' in window){fillVoices();speechSynthesis.onvoiceschanged=fillVoices;}
+vEl('voiceSel').addEventListener('change',e=>{store.set('marcVoice',e.target.value);speak('This is my new voice.');});
+function speak(text){if(!('speechSynthesis' in window))return vState('idle');speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text.replace(/[*_#`>]/g,''));const v=pickVoice();if(v){u.voice=v;u.lang=v.lang;}u.rate=1.03;u.onend=u.onerror=()=>vState('idle');vState('speaking');speechSynthesis.speak(u);}
+// ---- asking ----
+async function ask(text){
+  text=(text||'').trim();if(!text)return;
+  if(!LOCAL){vState('offline');return toast('Voice works when M.A.R.C is open on your laptop.');}
+  if(V.busy)return toast('Still working on your last request…');
+  V.busy=true;vLog('you',text);const wait=vLog('marc','Working on it…','wait');vState('thinking');
+  try{
+    const {task}=await api('/api/voice',{text,session:V.session});
+    let r;const t0=Date.now();
+    do{await new Promise(res=>setTimeout(res,1500));r=await api('/api/voice?task='+task);
+      if(Date.now()-t0>20000)wait.textContent='Still working… research and email imports can take a minute or two.';}
+    while(r.status==='working');
+    wait.classList.remove('wait');wait.textContent=r.reply||'Done.';
+    if(r.session){V.session=r.session;store.set('marcSession',r.session);}
+    speak(r.reply||'Done.');
+    loadJobs();if(typeof loadInvest==='function'&&document.getElementById('invest').classList.contains('on'))loadInvest();
+    if(document.getElementById('tracker').classList.contains('on'))loadTracker();
+  }catch(err){wait.classList.remove('wait');wait.textContent='Problem: '+err.message;speak(err.message);}
+  finally{V.busy=false;}
+}
+// ---- listening ----
+function listen(){
+  if(!SR){vLog('marc','Voice input needs Chrome or Edge. You can type below instead.');vEl('vinput').focus();return;}
+  if(V.busy||V.state==='listening')return;
+  speechSynthesis.cancel();
+  const rec=new SR();rec.lang='en-GB';rec.interimResults=true;rec.continuous=true;V.rec=rec;V.heard='';
+  rec.onresult=e=>{let s='';for(const r of e.results)s+=r[0].transcript;V.heard=s;vEl('voiceState').textContent='“'+s.slice(-60)+'”';};
+  rec.onerror=e=>{vState('idle',e.error==='not-allowed'?'Microphone blocked: click the lock icon in the address bar and allow it':'Didn\'t catch that, try again');};
+  rec.onend=()=>{V.rec=null;if(V.state==='listening'){vState('idle');if(V.heard.trim())ask(V.heard);}};
+  vState('listening');vEl('voiceLog').classList.add('on');rec.start();
+}
+function stopListening(){if(V.rec)V.rec.stop();}
+function toggleTalk(){if(V.state==='speaking'){speechSynthesis.cancel();return vState('idle');}if(V.state==='listening')return stopListening();listen();}
+vEl('micBtn').addEventListener('click',toggleTalk);vEl('talkBtn').addEventListener('click',toggleTalk);
+document.addEventListener('keydown',e=>{if(e.code!=='Space'||e.repeat||e.target.closest('input,textarea,select,button,[contenteditable]'))return;e.preventDefault();listen();});
+document.addEventListener('keyup',e=>{if(e.code==='Space'&&V.state==='listening'&&!e.target.closest('input,textarea,select'))stopListening();});
+vEl('vform').addEventListener('submit',e=>{e.preventDefault();const t=vEl('vinput').value;vEl('vinput').value='';ask(t);});
+vEl('vlogClose').addEventListener('click',()=>vEl('voiceLog').classList.remove('on'));
+vEl('newChat').addEventListener('click',()=>{V.session=null;store.set('marcSession',null);vEl('vmsgs').innerHTML='';toast('New conversation started.');});
+vEl('briefBtn').addEventListener('click',()=>ask('Give me my executive briefing for today: applications, roles waiting for approval, follow-ups due, and research cards to review.'));
+READY.then(()=>vState(LOCAL?'idle':'offline'));
 
 // ---- dashboard: real numbers when running locally ----
 async function liveDash(){
