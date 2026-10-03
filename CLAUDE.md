@@ -13,6 +13,12 @@ Personal dashboard for running and monitoring AI-assisted workflows. Opens in a 
 - Every new skill is reviewed (what it does, access needed, risks) before install, then recorded in `data/skills.json`.
 - Personal data (CVs, applications, holdings) lives in `private/` and is git-ignored. Never commit it.
 
+## Day to day
+- Start/serve: desktop icon or `scripts/launch.pyw` → `scripts/server.py` (127.0.0.1:8765 only).
+- Jobs: `scripts/jobs.py` (import/score/tailor), skill `import-job-alerts`, scheduled weekdays 8am.
+- Investments: `scripts/invest.py` (cards, Trading 212 read-only check), skill `research-investments`, scheduled Mondays 9am.
+- User guide: `MARC/guide.html`. Keep it in sync when behaviour changes.
+
 ## Layout
 - `MARC/`: the dashboard page (published via GitHub Pages; public, so never put personal data in it)
 - `.claude/skills/`: installed skills

@@ -1,6 +1,6 @@
 # Believe: M.A.R.C
 
-**[Open M.A.R.C](https://dolarewaju.github.io/Believe/MARC/)** · the page lives in the [`MARC/`](MARC/) folder.
+**[Open M.A.R.C](https://dolarewaju.github.io/Believe/MARC/)** · **[Day-to-day guide](https://dolarewaju.github.io/Believe/MARC/guide.html)** · the page lives in the [`MARC/`](MARC/) folder.
 
 M.A.R.C (Malone Autonomous Response Centre) is a personal agent command centre: one browser dashboard for running and monitoring AI-assisted workflows.
 

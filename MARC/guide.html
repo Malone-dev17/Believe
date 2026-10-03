@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M.A.R.C Guide</title>
+<link rel="icon" href="marc.ico">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#030b17;--panel:#081a30;--line:rgba(56,189,248,.2);--cyan:#22d3ee;--soft:#7dd3fc;--text:#e2f1ff;--muted:#8fa9c4;--amber:#fbbf24;--green:#34d399}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:15px/1.65 Inter,system-ui,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:32px 16px 64px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+h1{font:700 26px Orbitron,sans-serif;letter-spacing:.14em;color:var(--cyan)}
+h1 small{display:block;font:500 12px Inter,sans-serif;letter-spacing:.02em;color:var(--muted)}
+a{color:var(--soft)}
+.back{border:1px solid var(--line);border-radius:8px;padding:8px 14px;text-decoration:none}
+nav.toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin-bottom:28px;columns:2;column-gap:24px;font-size:14px}
+nav.toc a{display:block;padding:2px 0;text-decoration:none}
+section{margin:34px 0}
+h2{font:600 15px Orbitron,sans-serif;letter-spacing:.12em;color:var(--soft);text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px}
+h3{font-size:15px;margin:18px 0 6px}
+p,li{color:#d4e4f4}
+ol,ul{padding-left:22px}li{margin:4px 0}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--soft);font-weight:600}
+code,kbd{background:rgba(34,211,238,.1);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font:13px ui-monospace,Consolas,monospace;color:var(--text)}
+.note{border-left:3px solid var(--amber);background:rgba(251,191,36,.07);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.ok{border-left-color:var(--green);background:rgba(52,211,153,.07)}
+@media (max-width:640px){nav.toc{columns:1}}
+</style>
+</head>
+<body><div class="wrap">
+<header><h1>M.A.R.C GUIDE<small>Running your command centre day to day</small></h1><a class="back" href="./">← Back to M.A.R.C</a></header>
+
+<nav class="toc">
+<a href="#open">1. Opening M.A.R.C</a><a href="#daily">2. Your daily routine</a><a href="#weekly">3. Your weekly routine</a>
+<a href="#ask">4. Things you can ask Claude</a><a href="#auto">5. What runs by itself</a><a href="#skills">6. Adding skills later</a>
+<a href="#safe">7. Keeping your data safe</a><a href="#fix">8. If something goes wrong</a><a href="#map">9. Where everything lives</a>
+</nav>
+
+<section id="open"><h2>1. Opening M.A.R.C</h2>
+<ol>
+<li><b>Double-click the M.A.R.C icon on your desktop.</b> It starts quietly in the background and opens in your browser. Double-clicking again only reopens the page.</li>
+<li>Bookmark the page (<kbd>Ctrl</kbd>+<kbd>D</kbd>): <code>http://127.0.0.1:8765/MARC/</code></li>
+<li>After restarting your laptop, double-click the icon once to start M.A.R.C again.</li>
+</ol>
+<p class="note">The online copy on GitHub Pages only shows the layout. Your jobs, CVs, tracker and research stay on your laptop and only appear when you open M.A.R.C from the icon.</p>
+</section>
+
+<section id="daily"><h2>2. Your daily routine (weekdays)</h2>
+<table>
+<tr><th>When</th><th>What to do</th><th>Where</th></tr>
+<tr><td>8am (automatic)</td><td>Claude reads your job-alert emails and adds new roles, each with a score, a tailored CV and a cover note.</td><td>Job Hunter</td></tr>
+<tr><td>Morning, 5 min</td><td>Open <b>Job Hunter → Approval queue</b>. Click a role to see why it scored as it did and to read the cover note. Tick the good ones and click <b>Approve selected</b>. Dismiss the rest.</td><td>Job Hunter</td></tr>
+<tr><td>Applying, 1–3 min per role</td><td>In <b>Ready to submit</b>: click <b>Open job ↗</b>, download the <b>CV</b> and click <b>Copy note</b>. Apply on the site. <b>You</b> click Submit there. Then click <b>Mark applied</b>.</td><td>Job Hunter</td></tr>
+<tr><td>When replies arrive</td><td>Change the status (viewed, interview, rejected, offer) and add notes. The response rate updates itself.</td><td>Tracker</td></tr>
+<tr><td>Follow-ups</td><td>Roles appear under <b>Follow-ups due</b> 7 days after you apply. Click <b>Copy follow-up</b> and send it by email or LinkedIn.</td><td>Tracker</td></tr>
+</table>
+<p class="note ok">Target: 30–50 strong applications a day. Quality beats volume. Check every advert before approving, because alert emails only give the job title, so scoring has less to go on.</p>
+<p><b>Found a job yourself?</b> Click <b>Add a job link</b> in Job Hunter, paste the link, title, company and description, and M.A.R.C scores it and prepares the CV and note.</p>
+</section>
+
+<section id="weekly"><h2>3. Your weekly routine</h2>
+<ul>
+<li><b>Monday about 9am (automatic):</b> 3 new research cards on individual stocks, plus a news check on your YES watchlist.</li>
+<li><b>Monday, 10 min:</b> open <b>Investments</b>, read each card, and click <b>YES</b> (add to watchlist, with a reason) or <b>NO</b>. Everything you said yes to is under <b>Watchlist</b>.</li>
+<li><b>Any day:</b> look at the Tracker's <b>weekly totals</b> and <b>response rate</b>. If the response rate stays low, ask Claude to review which CV versions and roles are getting replies.</li>
+</ul>
+<p class="note">Research cards are facts with dated sources, not advice. M.A.R.C never places trades, and its Trading 212 key is read-only. Every card compares the investment's largest past fall with your 20% limit.</p>
+</section>
+
+<section id="ask"><h2>4. Things you can ask Claude</h2>
+<p>Open the Claude app, start a session in the <code>Documents\command-centre</code> folder, and type requests in plain English. For example:</p>
+<table>
+<tr><th>Say this</th><th>What happens</th></tr>
+<tr><td><code>import my job alerts</code></td><td>Runs the alert import now instead of waiting for 8am.</td></tr>
+<tr><td><code>add this job: &lt;link&gt;</code> + paste the description</td><td>Adds, scores and prepares one job.</td></tr>
+<tr><td><code>research &lt;ticker&gt;</code></td><td>One research card, e.g. <code>research TSLA</code>.</td></tr>
+<tr><td><code>research new investment ideas</code></td><td>An extra batch of cards outside Monday's run.</td></tr>
+<tr><td><code>add &lt;fact&gt; to my CV</code></td><td>Updates your master CV and rebuilds every version. Only true facts: Claude won't invent experience.</td></tr>
+<tr><td><code>add a target role: &lt;title&gt;</code></td><td>Adds a role, with keywords and a CV version.</td></tr>
+<tr><td><code>change my salary floor to £X</code></td><td>Changes the scoring rules.</td></tr>
+<tr><td><code>write a follow-up to &lt;company&gt;</code></td><td>A tailored follow-up message (cold-email skill).</td></tr>
+<tr><td><code>how is my job search going?</code></td><td>A summary from the Tracker: totals, response rate, which CV versions get replies.</td></tr>
+</table>
+</section>
+
+<section id="auto"><h2>5. What runs by itself, and what needs you</h2>
+<table>
+<tr><th>Runs by itself</th><th>Always needs you</th></tr>
+<tr><td>Reading job-alert emails (read-only)<br>Scoring roles and discarding poor matches<br>Building CVs and cover notes<br>Weekly research cards and watchlist checks<br>Checking instruments are on Trading 212</td><td>Approving roles<br>Logging in, CAPTCHAs and creating accounts on job sites<br><b>Clicking Submit on every application</b><br>Saying YES/NO to investments<br>Every trade (M.A.R.C can't place any)</td></tr>
+</table>
+<p class="note">Scheduled runs only happen while the Claude app is open. If the laptop was off, they run the next time you open the app. Manage them in the Claude sidebar under <b>Scheduled</b>.</p>
+<p>M.A.R.C never automates LinkedIn, Indeed or Totaljobs, because their rules ban it and accounts get restricted. Jobs come only from alert emails and links you add.</p>
+</section>
+
+<section id="skills"><h2>6. Adding skills later</h2>
+<p>A skill is a set of instructions that teaches Claude a new task. Every skill gets the same <b>review-then-install</b> treatment:</p>
+<ol>
+<li>Find a skill on GitHub (a folder with a <code>SKILL.md</code> file).</li>
+<li>In a Claude session in <code>Documents\command-centre</code>, paste the link and say <code>review this skill</code>.</li>
+<li>Claude reads every file and tells you in plain English what it does, what it needs access to, and anything risky or unnecessary.</li>
+<li>If you're happy, say <code>install it</code>. Claude copies it into <code>.claude\skills\</code>, leaves out anything unsafe (as it did with context-engineering's pre-approved commands), and tests that it works.</li>
+<li>Claude adds it to the <b>Tools &amp; Skills</b> list in M.A.R.C, with what it's for and where it came from, and saves it to GitHub.</li>
+</ol>
+<h3>Warning signs Claude checks for (and you can too)</h3>
+<ul>
+<li>Asks for API keys or accounts, or sends your data to an outside service</li>
+<li>Turns on tracking by default (browser-use did, so it was skipped)</li>
+<li>Pre-approves commands, so Claude would stop asking your permission</li>
+<li>Instructions that tell Claude to recommend the skill's own product</li>
+</ul>
+<h3>Plugins</h3>
+<p>Plugins bundle several skills. When Claude suggests one, an install card appears in the chat. Read the review first, then install from the card if you want it. To remove a skill, say <code>remove the &lt;name&gt; skill</code>.</p>
+</section>
+
+<section id="safe"><h2>7. Keeping your data safe</h2>
+<ul>
+<li>Everything personal lives in <code>private\</code>: your CV, profile, jobs, research, and keys. <b>Git ignores that folder, so it never goes to GitHub</b>, even though your repo is public.</li>
+<li><code>private\keys.env</code> holds your Trading 212 key. Never paste keys into chat, email or GitHub. If a key leaks, delete it in Trading 212 (Settings → API) and create a new <b>read-only</b> one.</li>
+<li>M.A.R.C's server only answers your own laptop (127.0.0.1). Other websites can't read or change your data.</li>
+<li>Back up <code>private\</code> now and then: copy it to a USB stick or a private cloud folder (not GitHub).</li>
+</ul>
+</section>
+
+<section id="fix"><h2>8. If something goes wrong</h2>
+<table>
+<tr><th>Problem</th><th>Fix</th></tr>
+<tr><td>The page won't load / "can't reach this page"</td><td>Double-click the desktop icon. If it still fails, restart the laptop and try again.</td></tr>
+<tr><td>Page shows "Online preview" and no data</td><td>You're on the GitHub copy. Use the bookmark or the desktop icon.</td></tr>
+<tr><td>Queue is empty in the morning</td><td>Check the Claude app was open at 8am, and that job alerts are set up on each site. Say <code>import my job alerts</code>.</td></tr>
+<tr><td>A scheduled run stopped to ask permission</td><td>Sidebar → Scheduled → the task → <b>Run now</b>, then approve. Approvals are remembered.</td></tr>
+<tr><td>Cards say "Trading 212: not yet checked"</td><td>Your key may have expired. Create a new read-only key, paste it into <code>keys.env</code>, then say <code>refresh the Trading 212 list</code>.</td></tr>
+<tr><td>Alert emails stop arriving</td><td>Check which Gmail account the connector uses (Settings → Connectors) and that alerts forward to it.</td></tr>
+<tr><td>Anything else</td><td>Describe it to Claude in a session in this folder, e.g. "the Tracker shows the wrong count".</td></tr>
+</table>
+</section>
+
+<section id="map"><h2>9. Where everything lives</h2>
+<table>
+<tr><th>Path</th><th>What it is</th><th>On GitHub?</th></tr>
+<tr><td><code>MARC\</code></td><td>The dashboard and this guide</td><td>Yes</td></tr>
+<tr><td><code>scripts\</code></td><td>Job pipeline, CV builder, research tools, server, launcher</td><td>Yes</td></tr>
+<tr><td><code>.claude\skills\</code></td><td>Installed skills</td><td>Yes</td></tr>
+<tr><td><code>data\skills.json</code></td><td>Skills register</td><td>Yes</td></tr>
+<tr><td><code>private\</code></td><td>CV, profile, jobs, tracker, research, keys</td><td><b>Never</b></td></tr>
+</table>
+</section>
+</div></body></html>
