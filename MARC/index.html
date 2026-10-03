@@ -278,6 +278,13 @@ main{min-width:0}
 
 <!-- ================= MAIN ================= -->
 <main>
+<div class="panel" id="onlineBanner" style="display:none;margin-bottom:12px;border-color:var(--cyan)">
+  <div class="bar" style="justify-content:space-between">
+    <div><b style="font:700 12px var(--display);letter-spacing:.1em;color:var(--cyan-soft)">ONLINE PREVIEW</b>
+    <p class="mu" style="font-size:12px;margin-top:4px">Your jobs, CVs and tracker live only on your laptop. Double-click the <b>M.A.R.C</b> icon on your desktop, or use the button if it's already running.</p></div>
+    <a class="btn" href="http://127.0.0.1:8765/MARC/">Open my live M.A.R.C ↗</a>
+  </div>
+</div>
 
 <!-- ---------- DASHBOARD ---------- -->
 <section class="view on" id="dash">
@@ -552,6 +559,8 @@ function show(v){document.querySelectorAll('.view').forEach(s=>s.classList.remov
   const real=document.getElementById(v);
   if(real&&v!=='ph'){real.classList.add('on');}else{const [t,x]=PH[v]||PH.soon;document.getElementById('phTitle').textContent=t;document.getElementById('phText').textContent=x;document.getElementById('ph').classList.add('on');}}
 document.querySelectorAll('.nav').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('on'));b.classList.add('on');show(b.dataset.view);}));
+if(!/^(127\.0\.0\.1|localhost)$/.test(location.hostname))document.getElementById('onlineBanner').style.display='block';
+
 // ================= JOB HUNTER =================
 const api=async(path,body)=>{const r=await fetch(path,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{});const j=await r.json();if(j.error)throw new Error(j.error);return j;};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
